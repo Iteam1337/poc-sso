@@ -1,6 +1,6 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const { jwtVerify } = require('jose');
+const { jwtDecode } = require('jose');
 const app = express();
 const port = 3001;
 
@@ -34,15 +34,15 @@ const extractUserFromCookies = async (req, res, next) => {
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
       try {
-        // In a real app, you would get the public key from Keycloak
+        // In a real app, you would verify the token with the public key from Keycloak
         // For demo, we'll just decode without verification
-        const decodedToken = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+        const decodedToken = jwtDecode(token);
         
         req.user = {
-          id: decodedToken.sub,
-          email: decodedToken.email,
-          name: decodedToken.name,
-          preferred_username: decodedToken.preferred_username,
+          id: decodedToken.payload.sub,
+          email: decodedToken.payload.email,
+          name: decodedToken.payload.name,
+          preferred_username: decodedToken.payload.preferred_username,
           source: 'id_token'
         };
         
