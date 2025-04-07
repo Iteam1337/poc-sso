@@ -186,10 +186,6 @@
               graph TD
               A[Frontend App] --> B[API Gateway]
               B --> C[Services]
-              
-              style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
-              style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
-              style C fill:#737373,stroke:#ffffff,stroke-width:2px
             </pre>
             <aside class="notes">
               In a microservice architecture, each service potentially needs to
@@ -304,10 +300,6 @@
               A -->|3. Code| B[API]
               B <-->|4. Token| K
               B -->|5. Cookie| A
-              
-              style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
-              style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
-              style K fill:#525252,stroke:#ffffff,stroke-width:4px
             </pre>
             <aside class="notes">
               Keycloak provides a comprehensive identity and access management
@@ -563,11 +555,6 @@ const extractJwtToken = (jwksService) => async (req, res, next) => {
               B <-->|Token| K[Keycloak]
               B --> C[Services]
               C -->|Verify| K
-              
-              style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
-              style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
-              style K fill:#525252,stroke:#ffffff,stroke-width:4px
-              style C fill:#737373,stroke:#ffffff,stroke-width:2px
             </pre>
             <p class="smaller">
               Each microservice can independently verify tokens using Keycloak's
@@ -742,16 +729,7 @@ helm install keycloak keycloak/keycloak \
         flowchart: {
           htmlLabels: true,
           curve: 'basis',
-        },
-        themeVariables: {
-          primaryColor: '#525252',
-          primaryTextColor: '#ffffff',
-          primaryBorderColor: '#ffffff',
-          lineColor: '#ffffff',
-          secondaryColor: '#a3a3a3',
-          tertiaryColor: '#737373',
-          fontSize: '16px',
-        },
+        }
       })
 
       // Render Mermaid diagrams when the slide is shown

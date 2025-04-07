@@ -12,10 +12,6 @@ Traditional monolithic applications had a straightforward authentication approac
 graph TD
     A[Frontend App] --> B[API Gateway]
     B --> C[Microservices]
-
-    style A fill:#aabbcc,stroke:#000,stroke-width:2px
-    style B fill:#a3a3a3,stroke:#000,stroke-width:2px
-    style C fill:#737373,stroke:#000,stroke-width:2px
 ```
 
 ### Key Challenges:
@@ -48,10 +44,6 @@ graph TD
     A -->|3. Code| B[Backend API]
     B <-->|4. Token Exchange| K
     B -->|5. Set Cookie| A
-
-    style A fill:#aabbcc,stroke:#ffffff,stroke-width:2px
-    style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
-    style K fill:#525252,stroke:#ffffff,stroke-width:4px
 ```
 
 ### Key Benefits:
@@ -279,11 +271,6 @@ graph TD
     B <-->|Token| K[Keycloak]
     B --> C[Services]
     C -->|Verify| K
-
-    style A fill:#aabbcc,stroke:#ffffff,stroke-width:2px
-    style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
-    style K fill:#525252,stroke:#ffffff,stroke-width:4px
-    style C fill:#737373,stroke:#ffffff,stroke-width:2px
 ```
 
 Each microservice can independently verify tokens using Keycloak's JWKS endpoint, without needing to share secrets.
