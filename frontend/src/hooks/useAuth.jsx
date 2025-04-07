@@ -23,41 +23,63 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const [token, setToken] = useState(null)
 
-  // Check for token in URL hash (for implicit flow) or localStorage
+  // Parse query parameters from URL
+  const getQueryParams = () => {
+    const searchParams = new URLSearchParams(window.location.search)
+    const params = {}
+    for (const [key, value] of searchParams.entries()) {
+      params[key] = value
+    }
+    return params
+  }
+
+  // Check for code in URL query params (for authorization code flow) or localStorage
   useEffect(() => {
     const checkAuth = async () => {
       try {
         // First check if we have a token in localStorage
         let accessToken = localStorage.getItem('access_token')
-
-        // If not, check if we have one in the URL (after redirect)
+        
+        // If not, check if we have a code in the URL (after redirect)
         if (!accessToken) {
-          const params = getHashParams()
-          if (params.access_token) {
-            accessToken = params.access_token
-            localStorage.setItem('access_token', accessToken)
-            // Clean up the URL
-            window.history.replaceState(
-              {},
-              document.title,
-              window.location.pathname,
+          const params = getQueryParams()
+          if (params.code) {
+            console.log('Authorization code received:', params.code)
+            
+            // Exchange code for token
+            const tokenResponse = await axios.post(
+              `${KEYCLOAK_URL}/protocol/openid-connect/token`,
+              new URLSearchParams({
+                grant_type: 'authorization_code',
+                client_id: CLIENT_ID,
+                code: params.code,
+                redirect_uri: `${window.location.origin}/callback`
+              }),
+              {
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+                }
+              }
             )
+            
+            accessToken = tokenResponse.data.access_token
+            localStorage.setItem('access_token', accessToken)
+            
+            // Clean up the URL
+            window.history.replaceState({}, document.title, window.location.pathname)
           }
         }
-
+        
         if (accessToken) {
           setToken(accessToken)
-
+          
           // Get user info using the token
-          const userInfo = await axios.get(
-            `${KEYCLOAK_URL}/protocol/openid-connect/userinfo`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            },
-          )
-
+          const userInfo = await axios.get(`${KEYCLOAK_URL}/protocol/openid-connect/userinfo`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`
+            }
+          })
+          
           setUser(userInfo.data)
         }
       } catch (error) {
