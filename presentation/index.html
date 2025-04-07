@@ -90,8 +90,9 @@
       .reveal .smaller {
         font-size: 0.75em;
       }
-      .mermaid {
+      pre.mermaid {
         font-size: 0.8em;
+        text-align: center;
       }
       /* Brand style filter for background images */
       .reveal .slides section[data-background-image] {
@@ -181,19 +182,14 @@
               Microservice architectures introduce
               <span class="highlight">complex authentication challenges</span>
             </p>
-            <div class="mermaid">
+            <pre class="mermaid">
               graph TD
               A[Frontend App] --> B[BFF/API Gateway]
               B --> C[Microservice 1]
               B --> D[Microservice 2]
               B --> E[Microservice 3]
               
-              style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
-              style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
-              style C fill:#737373,stroke:#ffffff,stroke-width:2px
-              style D fill:#737373,stroke:#ffffff,stroke-width:2px
-              style E fill:#737373,stroke:#ffffff,stroke-width:2px
-            </div>
+            </pre>
             <aside class="notes">
               In a microservice architecture, each service potentially needs to
               verify user identity. This creates multiple authentication points,
@@ -300,7 +296,7 @@
             <p>
               Centralized Identity with <span class="highlight">Keycloak</span>
             </p>
-            <div class="mermaid">
+            <pre class="mermaid">
               graph TD
               A[Frontend App] -->|1. Auth Request| K[Keycloak]
               K -->|2. Auth Code| A
@@ -311,11 +307,7 @@
               A -->|7. Cookie-based Requests| B
               B -->|8. Verify Token| C[Microservices]
               
-              style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
-              style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
-              style K fill:#525252,stroke:#ffffff,stroke-width:4px
-              style C fill:#737373,stroke:#ffffff,stroke-width:2px
-            </div>
+            </pre>
             <aside class="notes">
               Keycloak provides a comprehensive identity and access management
               solution. It centralizes authentication and provides secure token
@@ -564,7 +556,7 @@ const extractJwtToken = (jwksService) => async (req, res, next) => {
             data-background-color="#2a2a2a"
           >
             <h2>Scaling to Multiple Microservices</h2>
-            <div class="mermaid">
+            <pre class="mermaid">
               graph TD
               A[Frontend] -->|Auth Code| B[API Gateway]
               B -->|Token Exchange| K[Keycloak]
@@ -575,13 +567,7 @@ const extractJwtToken = (jwksService) => async (req, res, next) => {
               D -->|JWKS Verification| K
               E -->|JWKS Verification| K
               
-              style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
-              style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
-              style K fill:#525252,stroke:#ffffff,stroke-width:4px
-              style C fill:#737373,stroke:#ffffff,stroke-width:2px
-              style D fill:#737373,stroke:#ffffff,stroke-width:2px
-              style E fill:#737373,stroke:#ffffff,stroke-width:2px
-            </div>
+            </pre>
             <p class="smaller">
               Each microservice can independently verify tokens using Keycloak's
               JWKS endpoint

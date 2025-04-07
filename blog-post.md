@@ -1,6 +1,6 @@
 # Simplifying Authentication in Microservice Architectures with Keycloak
 
-In today's complex application landscapes, microservice architectures have become the standard for building scalable, maintainable systems. However, with this architectural shift comes a significant challenge: **authentication and authorization**. 
+In today's complex application landscapes, microservice architectures have become the standard for building scalable, maintainable systems. However, with this architectural shift comes a significant challenge: **authentication and authorization**.
 
 This blog post explores how to simplify authentication flows in microservice architectures using Keycloak as an identity provider, focusing on secure token handling, centralized authentication, and simplified implementation.
 
@@ -14,12 +14,12 @@ graph TD
     B --> C[Microservice 1]
     B --> D[Microservice 2]
     B --> E[Microservice 3]
-    
-    style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
-    style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
-    style C fill:#737373,stroke:#ffffff,stroke-width:2px
-    style D fill:#737373,stroke:#ffffff,stroke-width:2px
-    style E fill:#737373,stroke:#ffffff,stroke-width:2px
+
+    style A fill:#aabbcc,stroke:#000,stroke-width:2px
+    style B fill:#a3a3a3,stroke:#000,stroke-width:2px
+    style C fill:#737373,stroke:#000,stroke-width:2px
+    style D fill:#737373,stroke:#000,stroke-width:2px
+    style E fill:#737373,stroke:#000,stroke-width:2px
 ```
 
 ### Key Challenges:
@@ -55,8 +55,8 @@ graph TD
     B -->|6. Set HTTP-only Cookie| A
     A -->|7. Cookie-based Requests| B
     B -->|8. Verify Token| C[Microservices]
-    
-    style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
+
+    style A fill:#aabbcc,stroke:#ffffff,stroke-width:2px
     style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
     style K fill:#525252,stroke:#ffffff,stroke-width:4px
     style C fill:#737373,stroke:#ffffff,stroke-width:2px
@@ -83,7 +83,7 @@ The frontend initiates the authentication flow but delegates the token handling 
 initiateLogin() {
   const redirectUri = `${window.location.origin}/callback`;
   const encodedRedirectUri = encodeURIComponent(redirectUri);
-  
+
   const authUrl = `${KEYCLOAK_URL}/protocol/openid-connect/auth?client_id=${CLIENT_ID}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=openid email profile&state=${Date.now()}`;
 
   window.location.href = authUrl;
@@ -96,7 +96,7 @@ After authentication, the code is exchanged for tokens through the backend:
 // authService.js - Exchanges code for token via backend
 async exchangeCodeForToken(code) {
   const redirectUri = `${window.location.origin}/callback`;
-  
+
   const response = await axios.post(
     '/api/token',
     {
@@ -107,7 +107,7 @@ async exchangeCodeForToken(code) {
       withCredentials: true, // Important for cookies to be sent/received
     }
   );
-  
+
   return response.data;
 }
 ```
@@ -120,36 +120,39 @@ The backend securely exchanges the authorization code for tokens:
 // Token exchange endpoint
 app.post('/api/token', async (req, res) => {
   try {
-    const { code, redirect_uri } = req.body;
-    
+    const { code, redirect_uri } = req.body
+
     // Exchange the authorization code for tokens
     const tokenData = await tokenService.exchangeCodeForTokens(
       code,
       redirect_uri,
-    );
-    
+    )
+
     // Set cookies with the tokens
-    tokenService.setCookies(res, tokenData);
-    
+    tokenService.setCookies(res, tokenData)
+
     // Extract user info from token with verification
     const user = await tokenService.extractUserFromToken(
       tokenData.access_token,
       jwksService,
-    );
-    
+    )
+
     res.json({
       message: 'Authentication successful',
       user,
       expiresIn: tokenData.expires_in,
-    });
+    })
   } catch (error) {
-    console.error('Token exchange error:', error.response?.data || error.message);
+    console.error(
+      'Token exchange error:',
+      error.response?.data || error.message,
+    )
     res.status(401).json({
       error: 'Token exchange failed',
       details: error.response?.data || error.message,
-    });
+    })
   }
-});
+})
 ```
 
 ### 3. Secure Token Storage
@@ -166,7 +169,7 @@ setCookies(res, { access_token, refresh_token, expires_in }) {
     sameSite: 'strict',
     maxAge: expires_in * 1000,
   });
-  
+
   // Store refresh token in a separate cookie
   if (refresh_token) {
     res.cookie('refresh_token', refresh_token, {
@@ -188,13 +191,13 @@ Tokens are verified using Keycloak's JSON Web Key Set (JWKS):
 async verifyToken(token) {
   try {
     const jwks = await this.getJwks();
-    
+
     // Verify the token
     const { payload } = await jose.jwtVerify(token, jwks, {
       issuer: this.keycloakUrl,
       audience: 'account'  // This might need to be adjusted based on your Keycloak configuration
     });
-    
+
     return payload;
   } catch (error) {
     console.error('Token verification failed:', error.message);
@@ -212,43 +215,44 @@ API endpoints are protected using middleware that verifies the token:
 const extractJwtToken = (jwksService) => async (req, res, next) => {
   try {
     // First check for token in cookie
-    const token = req.cookies.auth_token;
-    
+    const token = req.cookies.auth_token
+
     // Fallback to Authorization header if no cookie
-    const authHeader = req.headers.authorization;
-    const headerToken = authHeader && authHeader.startsWith('Bearer ') 
-      ? authHeader.split(' ')[1] 
-      : null;
-    
+    const authHeader = req.headers.authorization
+    const headerToken =
+      authHeader && authHeader.startsWith('Bearer ')
+        ? authHeader.split(' ')[1]
+        : null
+
     // Use token from cookie or header
-    const accessToken = token || headerToken;
-    
+    const accessToken = token || headerToken
+
     if (!accessToken) {
-      return res.status(401).json({ error: 'Authentication required' });
+      return res.status(401).json({ error: 'Authentication required' })
     }
-    
+
     try {
       // Verify the token using JWKS
-      const decodedToken = await jwksService.verifyToken(accessToken);
-      
+      const decodedToken = await jwksService.verifyToken(accessToken)
+
       req.user = {
         id: decodedToken.sub,
         email: decodedToken.email,
         name: decodedToken.name,
         preferred_username: decodedToken.preferred_username,
-        source: 'keycloak'
-      };
-      
-      next();
+        source: 'keycloak',
+      }
+
+      next()
     } catch (tokenError) {
-      console.error('Token verification error:', tokenError.message);
-      return res.status(401).json({ error: 'Invalid token' });
+      console.error('Token verification error:', tokenError.message)
+      return res.status(401).json({ error: 'Invalid token' })
     }
   } catch (error) {
-    console.error('Authentication error:', error);
-    res.status(401).json({ error: 'Authentication failed' });
+    console.error('Authentication error:', error)
+    res.status(401).json({ error: 'Authentication failed' })
   }
-};
+}
 ```
 
 ## OWASP Security Considerations
@@ -287,8 +291,8 @@ graph TD
     C -->|JWKS Verification| K
     D -->|JWKS Verification| K
     E -->|JWKS Verification| K
-    
-    style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
+
+    style A fill:#aabbcc,stroke:#ffffff,stroke-width:2px
     style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
     style K fill:#525252,stroke:#ffffff,stroke-width:4px
     style C fill:#737373,stroke:#ffffff,stroke-width:2px
@@ -315,18 +319,18 @@ async getJwks() {
     try {
       console.log('Fetching JWKS from', this.jwksUri);
       const response = await axios.get(this.jwksUri);
-      
+
       // Create a JWKS from the response
       this.keyStore = await jose.createRemoteJWKSet(new URL(this.jwksUri));
       this.lastFetched = now;
-      
+
       console.log('JWKS fetched successfully');
     } catch (error) {
       console.error('Error fetching JWKS:', error.message);
       throw error;
     }
   }
-  
+
   return this.keyStore;
 }
 ```
