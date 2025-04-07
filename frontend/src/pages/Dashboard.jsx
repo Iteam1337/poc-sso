@@ -18,8 +18,10 @@ function Dashboard() {
         // Also try to get the token and pass it to our API
         if (userInfoResponse.data) {
           try {
-            // Call our API with the user info
-            const apiResponse = await axios.get('/api/user', {})
+            // Call our API with credentials (cookies will be sent automatically)
+            const apiResponse = await axios.get('/api/user', {
+              withCredentials: true
+            })
             setUserData({
               oauth2User: userInfoResponse.data,
               apiData: apiResponse.data,
