@@ -81,8 +81,8 @@ export function AuthProvider({ children }) {
     setUser(null)
     
     // Redirect to Keycloak logout
-    const logoutUrl = `${KEYCLOAK_URL}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(window.location.origin)}`
-    window.location.href = logoutUrl
+    const redirectUri = encodeURIComponent(window.location.origin)
+    window.location.href = `${KEYCLOAK_URL}/protocol/openid-connect/logout?redirect_uri=${redirectUri}`
   }
 
   return (
