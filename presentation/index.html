@@ -182,13 +182,17 @@
               <span class="highlight">complex authentication challenges</span>
             </p>
             <div class="mermaid">
-              graph TD A[Frontend App] --> B[BFF/API Gateway] B -->
-              C[Microservice 1] B --> D[Microservice 2] B --> E[Microservice 3]
-              style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px style B
-              fill:#a3a3a3,stroke:#ffffff,stroke-width:2px style C
-              fill:#737373,stroke:#ffffff,stroke-width:2px style D
-              fill:#737373,stroke:#ffffff,stroke-width:2px style E
-              fill:#737373,stroke:#ffffff,stroke-width:2px
+              graph TD
+              A[Frontend App] --> B[BFF/API Gateway]
+              B --> C[Microservice 1]
+              B --> D[Microservice 2]
+              B --> E[Microservice 3]
+              
+              style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
+              style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
+              style C fill:#737373,stroke:#ffffff,stroke-width:2px
+              style D fill:#737373,stroke:#ffffff,stroke-width:2px
+              style E fill:#737373,stroke:#ffffff,stroke-width:2px
             </div>
             <aside class="notes">
               In a microservice architecture, each service potentially needs to
@@ -297,15 +301,20 @@
               Centralized Identity with <span class="highlight">Keycloak</span>
             </p>
             <div class="mermaid">
-              graph TD A[Frontend App] -->|1. Auth Request| K[Keycloak] K -->|2.
-              Auth Code| A A -->|3. Code| B[Backend API] B -->|4. Token
-              Exchange| K K -->|5. Tokens + JWT| B B -->|6. Set HTTP-only
-              Cookie| A A -->|7. Cookie-based Requests| B B -->|8. Verify Token|
-              C[Microservices] style A
-              fill:#d4d4d4,stroke:#ffffff,stroke-width:2px style B
-              fill:#a3a3a3,stroke:#ffffff,stroke-width:2px style K
-              fill:#525252,stroke:#ffffff,stroke-width:4px style C
-              fill:#737373,stroke:#ffffff,stroke-width:2px
+              graph TD
+              A[Frontend App] -->|1. Auth Request| K[Keycloak]
+              K -->|2. Auth Code| A
+              A -->|3. Code| B[Backend API]
+              B -->|4. Token Exchange| K
+              K -->|5. Tokens + JWT| B
+              B -->|6. Set HTTP-only Cookie| A
+              A -->|7. Cookie-based Requests| B
+              B -->|8. Verify Token| C[Microservices]
+              
+              style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
+              style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
+              style K fill:#525252,stroke:#ffffff,stroke-width:4px
+              style C fill:#737373,stroke:#ffffff,stroke-width:2px
             </div>
             <aside class="notes">
               Keycloak provides a comprehensive identity and access management
@@ -556,17 +565,22 @@ const extractJwtToken = (jwksService) => async (req, res, next) => {
           >
             <h2>Scaling to Multiple Microservices</h2>
             <div class="mermaid">
-              graph TD A[Frontend] -->|Auth Code| B[API Gateway] B -->|Token
-              Exchange| K[Keycloak] B -->|Verified Requests| C[Service 1] B
-              -->|Verified Requests| D[Service 2] B -->|Verified Requests|
-              E[Service 3] C -->|JWKS Verification| K D -->|JWKS Verification| K
-              E -->|JWKS Verification| K style A
-              fill:#d4d4d4,stroke:#ffffff,stroke-width:2px style B
-              fill:#a3a3a3,stroke:#ffffff,stroke-width:2px style K
-              fill:#525252,stroke:#ffffff,stroke-width:4px style C
-              fill:#737373,stroke:#ffffff,stroke-width:2px style D
-              fill:#737373,stroke:#ffffff,stroke-width:2px style E
-              fill:#737373,stroke:#ffffff,stroke-width:2px
+              graph TD
+              A[Frontend] -->|Auth Code| B[API Gateway]
+              B -->|Token Exchange| K[Keycloak]
+              B -->|Verified Requests| C[Service 1]
+              B -->|Verified Requests| D[Service 2]
+              B -->|Verified Requests| E[Service 3]
+              C -->|JWKS Verification| K
+              D -->|JWKS Verification| K
+              E -->|JWKS Verification| K
+              
+              style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
+              style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
+              style K fill:#525252,stroke:#ffffff,stroke-width:4px
+              style C fill:#737373,stroke:#ffffff,stroke-width:2px
+              style D fill:#737373,stroke:#ffffff,stroke-width:2px
+              style E fill:#737373,stroke:#ffffff,stroke-width:2px
             </div>
             <p class="smaller">
               Each microservice can independently verify tokens using Keycloak's
