@@ -40,7 +40,13 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
+      // First sign out from OAuth2 Proxy
       await axios.get('/oauth2/sign_out')
+      
+      // Then redirect to Keycloak logout
+      const redirectUri = encodeURIComponent(window.location.origin)
+      window.location.href = `https://keycloak.berget.ai/realms/iteam/protocol/openid-connect/logout?redirect_uri=${redirectUri}`
+      
       setUser(null)
     } catch (error) {
       console.error('Logout failed', error)
