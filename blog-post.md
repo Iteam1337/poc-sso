@@ -15,11 +15,11 @@ graph TD
     B --> D[Microservice 2]
     B --> E[Microservice 3]
     
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333,stroke-width:2px
-    style C fill:#dfd,stroke:#333,stroke-width:2px
-    style D fill:#dfd,stroke:#333,stroke-width:2px
-    style E fill:#dfd,stroke:#333,stroke-width:2px
+    style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
+    style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
+    style C fill:#737373,stroke:#ffffff,stroke-width:2px
+    style D fill:#737373,stroke:#ffffff,stroke-width:2px
+    style E fill:#737373,stroke:#ffffff,stroke-width:2px
 ```
 
 ### Key Challenges:
@@ -56,10 +56,10 @@ graph TD
     A -->|7. Cookie-based Requests| B
     B -->|8. Verify Token| C[Microservices]
     
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333,stroke-width:2px
-    style K fill:#ffd,stroke:#333,stroke-width:4px
-    style C fill:#dfd,stroke:#333,stroke-width:2px
+    style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
+    style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
+    style K fill:#525252,stroke:#ffffff,stroke-width:4px
+    style C fill:#737373,stroke:#ffffff,stroke-width:2px
 ```
 
 ### Key Benefits:
@@ -288,12 +288,12 @@ graph TD
     D -->|JWKS Verification| K
     E -->|JWKS Verification| K
     
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333,stroke-width:2px
-    style K fill:#ffd,stroke:#333,stroke-width:4px
-    style C fill:#dfd,stroke:#333,stroke-width:2px
-    style D fill:#dfd,stroke:#333,stroke-width:2px
-    style E fill:#dfd,stroke:#333,stroke-width:2px
+    style A fill:#d4d4d4,stroke:#ffffff,stroke-width:2px
+    style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
+    style K fill:#525252,stroke:#ffffff,stroke-width:4px
+    style C fill:#737373,stroke:#ffffff,stroke-width:2px
+    style D fill:#737373,stroke:#ffffff,stroke-width:2px
+    style E fill:#737373,stroke:#ffffff,stroke-width:2px
 ```
 
 Each microservice can independently verify tokens using Keycloak's JWKS endpoint, without needing to share secrets.
