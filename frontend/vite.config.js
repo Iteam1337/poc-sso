@@ -33,6 +33,7 @@ export default defineConfig({
         target: 'http://api:3001',
         changeOrigin: true,
         secure: false,
+        pathRewrite: { '^/api': '' },
       },
     },
   },

@@ -33,7 +33,12 @@ function Dashboard() {
             console.error('Error calling API:', apiError)
             setUserData({
               oauth2User: userInfoResponse.data,
-              apiError: apiError.message
+              apiError: apiError.message,
+              apiErrorDetails: {
+                status: apiError.response?.status,
+                statusText: apiError.response?.statusText,
+                data: apiError.response?.data
+              }
             })
           }
         }
@@ -75,6 +80,12 @@ function Dashboard() {
               <>
                 <h4>API Error:</h4>
                 <pre>{userData.apiError}</pre>
+                {userData.apiErrorDetails && (
+                  <>
+                    <h5>Error Details:</h5>
+                    <pre>{JSON.stringify(userData.apiErrorDetails, null, 2)}</pre>
+                  </>
+                )}
               </>
             )}
           </div>
