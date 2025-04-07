@@ -10,13 +10,13 @@ function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/callback" element={<Callback />} />
-      <Route 
-        path="/dashboard" 
+      <Route
+        path="/dashboard"
         element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
-        } 
+        }
       />
     </Routes>
   )

@@ -10,11 +10,11 @@ function Dashboard() {
   useEffect(() => {
     const fetchApiData = async () => {
       if (!user) return
-      
+
       try {
         // Call our API with the cookie (withCredentials ensures cookies are sent)
         const response = await axios.get('/api/user', {
-          withCredentials: true
+          withCredentials: true,
         })
         setApiData(response.data)
       } catch (error) {
@@ -35,7 +35,10 @@ function Dashboard() {
     <div className="container">
       <h1>Dashboard</h1>
       <div className="user-info">
-        <h2>Welcome, {user?.name || user?.preferred_username || user?.email || 'User'}</h2>
+        <h2>
+          Welcome,{' '}
+          {user?.name || user?.preferred_username || user?.email || 'User'}
+        </h2>
         <p>You are authenticated directly with Keycloak!</p>
 
         <div className="token-info">

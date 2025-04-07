@@ -1,12 +1,12 @@
-const axios = require('axios');
-const jose = require('jose');
+const axios = require('axios')
+const jose = require('jose')
 
 class TokenService {
   constructor(keycloakUrl, clientId, clientSecret) {
-    this.keycloakUrl = keycloakUrl;
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
-    this.tokenEndpoint = `${keycloakUrl}/protocol/openid-connect/token`;
+    this.keycloakUrl = keycloakUrl
+    this.clientId = clientId
+    this.clientSecret = clientSecret
+    this.tokenEndpoint = `${keycloakUrl}/protocol/openid-connect/token`
   }
 
   async exchangeCodeForTokens(code, redirectUri) {
@@ -18,50 +18,53 @@ class TokenService {
           client_id: this.clientId,
           client_secret: this.clientSecret,
           code: code,
-          redirect_uri: redirectUri
+          redirect_uri: redirectUri,
         }).toString(),
         {
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        }
-      );
-      
-      return response.data;
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        },
+      )
+
+      return response.data
     } catch (error) {
-      console.error('Token exchange error:', error.response?.data || error.message);
-      throw error;
+      console.error(
+        'Token exchange error:',
+        error.response?.data || error.message,
+      )
+      throw error
     }
   }
 
   decodeToken(token) {
-    return jose.decodeJwt(token);
+    return jose.decodeJwt(token)
   }
 
   async extractUserFromToken(token, jwksService) {
     try {
       // If jwksService is provided, use it to verify the token
       if (jwksService) {
-        const verifiedToken = await jwksService.verifyToken(token);
+        const verifiedToken = await jwksService.verifyToken(token)
         return {
           id: verifiedToken.sub,
           email: verifiedToken.email,
           name: verifiedToken.name,
-          preferred_username: verifiedToken.preferred_username
-        };
+          preferred_username: verifiedToken.preferred_username,
+        }
       } else {
         // Fall back to just decoding without verification
-        const decodedToken = this.decodeToken(token);
+        const decodedToken = this.decodeToken(token)
         return {
           id: decodedToken.sub,
           email: decodedToken.email,
           name: decodedToken.name,
-          preferred_username: decodedToken.preferred_username
-        };
+          preferred_username: decodedToken.preferred_username,
+        }
       }
     } catch (error) {
-      console.error('Error extracting user from token:', error.message);
-      throw error;
+      console.error('Error extracting user from token:', error.message)
+      throw error
     }
   }
 
@@ -71,24 +74,24 @@ class TokenService {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: expires_in * 1000
-    });
-    
+      maxAge: expires_in * 1000,
+    })
+
     // Store refresh token in a separate cookie
     if (refresh_token) {
       res.cookie('refresh_token', refresh_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-      });
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      })
     }
   }
 
   clearAuthCookies(res) {
-    res.clearCookie('auth_token');
-    res.clearCookie('refresh_token');
+    res.clearCookie('auth_token')
+    res.clearCookie('refresh_token')
   }
 }
 
-module.exports = TokenService;
+module.exports = TokenService

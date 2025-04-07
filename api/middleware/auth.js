@@ -1,36 +1,37 @@
-const jose = require('jose');
+const jose = require('jose')
 
 // Middleware to extract and verify JWT from cookies
 const extractJwtToken = (jwksService) => async (req, res, next) => {
   try {
     // First check for token in cookie
-    const token = req.cookies.auth_token;
-    
+    const token = req.cookies.auth_token
+
     // Fallback to Authorization header if no cookie
-    const authHeader = req.headers.authorization;
-    const headerToken = authHeader && authHeader.startsWith('Bearer ') 
-      ? authHeader.split(' ')[1] 
-      : null;
-    
+    const authHeader = req.headers.authorization
+    const headerToken =
+      authHeader && authHeader.startsWith('Bearer ')
+        ? authHeader.split(' ')[1]
+        : null
+
     // Use token from cookie or header
-    const accessToken = token || headerToken;
-    
+    const accessToken = token || headerToken
+
     if (!accessToken) {
-      return res.status(401).json({ error: 'Authentication required' });
+      return res.status(401).json({ error: 'Authentication required' })
     }
-    
+
     try {
       // Verify the token using JWKS
-      const decodedToken = await jwksService.verifyToken(accessToken);
-      
+      const decodedToken = await jwksService.verifyToken(accessToken)
+
       req.user = {
         id: decodedToken.sub,
         email: decodedToken.email,
         name: decodedToken.name,
         preferred_username: decodedToken.preferred_username,
-        source: 'keycloak'
-      };
-      
+        source: 'keycloak',
+      }
+
       // If token came from header, set it as a secure cookie
       if (headerToken && !token) {
         // Set HTTP-only cookie that can't be accessed by JavaScript
@@ -38,21 +39,21 @@ const extractJwtToken = (jwksService) => async (req, res, next) => {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production', // Only use secure in production
           sameSite: 'strict',
-          maxAge: 3600000 // 1 hour
-        });
+          maxAge: 3600000, // 1 hour
+        })
       }
-      
-      next();
+
+      next()
     } catch (tokenError) {
-      console.error('Token verification error:', tokenError.message);
-      return res.status(401).json({ error: 'Invalid token' });
+      console.error('Token verification error:', tokenError.message)
+      return res.status(401).json({ error: 'Invalid token' })
     }
   } catch (error) {
-    console.error('Authentication error:', error);
-    res.status(401).json({ error: 'Authentication failed' });
+    console.error('Authentication error:', error)
+    res.status(401).json({ error: 'Authentication failed' })
   }
-};
+}
 
 module.exports = {
-  extractJwtToken
-};
+  extractJwtToken,
+}
