@@ -3,20 +3,18 @@ import { useAuth } from '../hooks/useAuth'
 import axios from 'axios'
 
 function Dashboard() {
-  const { user, logout, token } = useAuth()
+  const { user, logout } = useAuth()
   const [apiData, setApiData] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchApiData = async () => {
-      if (!token) return
+      if (!user) return
       
       try {
-        // Call our API with the token
+        // Call our API with the cookie (withCredentials ensures cookies are sent)
         const response = await axios.get('/api/user', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          withCredentials: true
         })
         setApiData(response.data)
       } catch (error) {
@@ -27,7 +25,7 @@ function Dashboard() {
     }
 
     fetchApiData()
-  }, [token])
+  }, [user])
 
   if (loading) {
     return <div>Loading...</div>

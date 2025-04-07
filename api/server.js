@@ -1,25 +1,35 @@
 const express = require('express');
 const { jwtDecode } = require('jose');
+const cookieParser = require('cookie-parser');
 const app = express();
 const port = 3001;
 
 app.use(express.json());
+app.use(cookieParser());
 
-// Middleware to extract and verify JWT from Authorization header
+// Middleware to extract and verify JWT from cookies
 const extractJwtToken = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    // First check for token in cookie
+    const token = req.cookies.auth_token;
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    // Fallback to Authorization header if no cookie
+    const authHeader = req.headers.authorization;
+    const headerToken = authHeader && authHeader.startsWith('Bearer ') 
+      ? authHeader.split(' ')[1] 
+      : null;
+    
+    // Use token from cookie or header
+    const accessToken = token || headerToken;
+    
+    if (!accessToken) {
       return res.status(401).json({ error: 'Authentication required' });
     }
-    
-    const token = authHeader.split(' ')[1];
     
     try {
       // In a production app, you would verify the token signature
       // For this demo, we'll just decode it
-      const decodedToken = jwtDecode(token);
+      const decodedToken = jwtDecode(accessToken);
       
       req.user = {
         id: decodedToken.payload.sub,
@@ -28,6 +38,17 @@ const extractJwtToken = async (req, res, next) => {
         preferred_username: decodedToken.payload.preferred_username,
         source: 'keycloak'
       };
+      
+      // If token came from header, set it as a secure cookie
+      if (headerToken && !token) {
+        // Set HTTP-only cookie that can't be accessed by JavaScript
+        res.cookie('auth_token', headerToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production', // Only use secure in production
+          sameSite: 'strict',
+          maxAge: 3600000 // 1 hour
+        });
+      }
       
       next();
     } catch (tokenError) {
@@ -56,6 +77,12 @@ app.get('/user', extractJwtToken, (req, res) => {
     user: req.user,
     timestamp: new Date().toISOString()
   });
+});
+
+// Endpoint to clear auth cookie on logout
+app.get('/api/logout', (req, res) => {
+  res.clearCookie('auth_token');
+  res.json({ message: 'Logged out successfully' });
 });
 
 // Health check endpoint

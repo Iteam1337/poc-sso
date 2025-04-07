@@ -8,20 +8,9 @@ const CLIENT_ID = 'demo'
 
 const AuthContext = createContext(null)
 
-// Parse hash parameters from URL
-const getHashParams = () => {
-  const hash = window.location.hash.substr(1)
-  return hash.split('&').reduce((result, item) => {
-    const parts = item.split('=')
-    result[parts[0]] = decodeURIComponent(parts[1])
-    return result
-  }, {})
-}
-
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [token, setToken] = useState(null)
 
   // Parse query parameters from URL
   const getQueryParams = () => {
@@ -33,45 +22,40 @@ export function AuthProvider({ children }) {
     return params
   }
 
-  // Check for code in URL query params (for authorization code flow) or localStorage
+  // Check for code in URL query params (for authorization code flow)
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // First check if we have a token in localStorage
-        let accessToken = localStorage.getItem('access_token')
-        
-        // If not, check if we have a code in the URL (after redirect)
-        if (!accessToken) {
-          const params = getQueryParams()
-          if (params.code) {
-            console.log('Authorization code received:', params.code)
-            
-            // Exchange code for token
-            const tokenResponse = await axios.post(
-              `${KEYCLOAK_URL}/protocol/openid-connect/token`,
-              new URLSearchParams({
-                grant_type: 'authorization_code',
-                client_id: CLIENT_ID,
-                code: params.code,
-                redirect_uri: `${window.location.origin}/callback`
-              }),
-              {
-                headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded'
-                }
+        // Check if we have a code in the URL (after redirect)
+        const params = getQueryParams()
+        if (params.code) {
+          console.log('Authorization code received:', params.code)
+          
+          // Exchange code for token
+          const tokenResponse = await axios.post(
+            `${KEYCLOAK_URL}/protocol/openid-connect/token`,
+            new URLSearchParams({
+              grant_type: 'authorization_code',
+              client_id: CLIENT_ID,
+              code: params.code,
+              redirect_uri: `${window.location.origin}/callback`
+            }),
+            {
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
               }
-            )
-            
-            accessToken = tokenResponse.data.access_token
-            localStorage.setItem('access_token', accessToken)
-            
-            // Clean up the URL
-            window.history.replaceState({}, document.title, window.location.pathname)
-          }
-        }
-        
-        if (accessToken) {
-          setToken(accessToken)
+            }
+          )
+          
+          const accessToken = tokenResponse.data.access_token
+          
+          // Make a request to our API with the token to set the HTTP-only cookie
+          await axios.get('/api/user', {
+            headers: {
+              Authorization: `Bearer ${accessToken}`
+            },
+            withCredentials: true // Important for cookies to be sent/received
+          })
           
           // Get user info using the token
           const userInfo = await axios.get(`${KEYCLOAK_URL}/protocol/openid-connect/userinfo`, {
@@ -81,12 +65,26 @@ export function AuthProvider({ children }) {
           })
           
           setUser(userInfo.data)
+          
+          // Clean up the URL
+          window.history.replaceState({}, document.title, window.location.pathname)
+        } else {
+          // Try to get user info from API using the cookie
+          try {
+            const apiResponse = await axios.get('/api/user', {
+              withCredentials: true // Important for cookies to be sent
+            })
+            
+            if (apiResponse.data && apiResponse.data.user) {
+              setUser(apiResponse.data.user)
+            }
+          } catch (apiError) {
+            console.log('Not authenticated via API cookie')
+            setUser(null)
+          }
         }
       } catch (error) {
         console.log('Authentication error:', error.message)
-        // Clear token if it's invalid
-        localStorage.removeItem('access_token')
-        setToken(null)
         setUser(null)
       } finally {
         setLoading(false)
@@ -105,19 +103,23 @@ export function AuthProvider({ children }) {
     window.location.href = authUrl
   }
 
-  const logout = () => {
-    // Clear local token
-    localStorage.removeItem('access_token')
-    setToken(null)
-    setUser(null)
-
-    // Redirect to Keycloak logout
-    const redirectUri = encodeURIComponent(window.location.origin)
-    window.location.href = `${KEYCLOAK_URL}/protocol/openid-connect/logout?redirect_uri=${redirectUri}`
+  const logout = async () => {
+    try {
+      // Clear the auth cookie from API
+      await axios.get('/api/logout', { withCredentials: true })
+      
+      setUser(null)
+      
+      // Redirect to Keycloak logout
+      const redirectUri = encodeURIComponent(window.location.origin)
+      window.location.href = `${KEYCLOAK_URL}/protocol/openid-connect/logout?redirect_uri=${redirectUri}`
+    } catch (error) {
+      console.error('Logout failed:', error.message)
+    }
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, token }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
