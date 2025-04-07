@@ -6,32 +6,34 @@ function Callback() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [error, setError] = useState(null)
-  
+
   useEffect(() => {
     // Check for error in URL
     const urlParams = new URLSearchParams(window.location.search)
     const errorParam = urlParams.get('error')
     const errorDescription = urlParams.get('error_description')
-    
+
     if (errorParam) {
       setError(`${errorParam}: ${errorDescription || 'Unknown error'}`)
       return
     }
-    
+
     // The AuthProvider will handle extracting the code from the URL
     const checkAuthStatus = () => {
       if (user) {
         navigate('/dashboard')
       } else if (!urlParams.has('code')) {
         // If no code and no user, something went wrong
-        setError('No authorization code received from Keycloak')
+        setError(
+          'No authorization code received from Keycloak. Please refresh the page and try again.',
+        )
       }
     }
-    
+
     const timer = setTimeout(checkAuthStatus, 1000)
     return () => clearTimeout(timer)
   }, [navigate, user])
-  
+
   if (error) {
     return (
       <div className="container">
@@ -43,7 +45,7 @@ function Callback() {
       </div>
     )
   }
-  
+
   return (
     <div className="container">
       <h2>Authenticating...</h2>
