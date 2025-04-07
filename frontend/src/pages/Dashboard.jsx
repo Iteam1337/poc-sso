@@ -4,53 +4,29 @@ import axios from 'axios'
 
 function Dashboard() {
   const { user, logout } = useAuth()
-  const [userData, setUserData] = useState(null)
+  const [apiData, setApiData] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchApiData = async () => {
       try {
-        // Get user info from OAuth2 Proxy
-        const userInfoResponse = await axios.get('/oauth2/userinfo', {
-          withCredentials: true,
+        // Call our API with cookies (automatically sent)
+        const response = await axios.get('/api/user', {
+          withCredentials: true
         })
-
-        // Also try to get the token and pass it to our API
-        if (userInfoResponse.data) {
-          try {
-            // Call our API with credentials (cookies will be sent automatically)
-            const apiResponse = await axios.get('/api/user', {
-              withCredentials: true
-            })
-            setUserData({
-              oauth2User: userInfoResponse.data,
-              apiData: apiResponse.data,
-            })
-          } catch (apiError) {
-            console.error('Error calling API:', apiError)
-            setUserData({
-              oauth2User: userInfoResponse.data,
-              apiError: apiError.message,
-              apiErrorDetails: {
-                status: apiError.response?.status,
-                statusText: apiError.response?.statusText,
-                data: apiError.response?.data,
-              },
-            })
-          }
-        }
+        setApiData(response.data)
       } catch (error) {
-        console.error('Error fetching user data', error)
+        console.error('API call failed:', error.message)
       } finally {
         setLoading(false)
       }
     }
 
-    fetchUserData()
+    fetchApiData()
   }, [])
 
   if (loading) {
-    return <div>Loading user data...</div>
+    return <div>Loading...</div>
   }
 
   return (
@@ -60,35 +36,18 @@ function Dashboard() {
         <h2>Welcome, {user.email || user.name || user.user || 'User'}</h2>
         <p>You are authenticated!</p>
 
-        {userData && (
-          <div className="token-info">
-            <h3>User Information</h3>
-            <h4>OAuth2 Proxy User Info:</h4>
-            <pre>{JSON.stringify(userData.oauth2User, null, 2)}</pre>
+        <div className="token-info">
+          <h3>User Information</h3>
+          <h4>OAuth2 Proxy User Info:</h4>
+          <pre>{JSON.stringify(user, null, 2)}</pre>
 
-            {userData.apiData && (
-              <>
-                <h4>API Response:</h4>
-                <pre>{JSON.stringify(userData.apiData, null, 2)}</pre>
-              </>
-            )}
-
-            {userData.apiError && (
-              <>
-                <h4>API Error:</h4>
-                <pre>{userData.apiError}</pre>
-                {userData.apiErrorDetails && (
-                  <>
-                    <h5>Error Details:</h5>
-                    <pre>
-                      {JSON.stringify(userData.apiErrorDetails, null, 2)}
-                    </pre>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        )}
+          {apiData && (
+            <>
+              <h4>API Response:</h4>
+              <pre>{JSON.stringify(apiData, null, 2)}</pre>
+            </>
+          )}
+        </div>
       </div>
       <button onClick={logout} className="logout-button">
         Logout
