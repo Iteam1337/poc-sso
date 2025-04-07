@@ -32,10 +32,10 @@ const extractJwtToken = async (req, res, next) => {
       const decodedToken = jwtDecode(accessToken);
       
       req.user = {
-        id: decodedToken.payload.sub,
-        email: decodedToken.payload.email,
-        name: decodedToken.payload.name,
-        preferred_username: decodedToken.payload.preferred_username,
+        id: decodedToken.sub,
+        email: decodedToken.email,
+        name: decodedToken.name,
+        preferred_username: decodedToken.preferred_username,
         source: 'keycloak'
       };
       

@@ -39,7 +39,7 @@ export function AuthProvider({ children }) {
               client_id: CLIENT_ID,
               code: params.code,
               redirect_uri: `${window.location.origin}/callback`
-            }),
+            }).toString(),
             {
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -96,9 +96,10 @@ export function AuthProvider({ children }) {
 
   const login = () => {
     // Redirect to Keycloak login
-    const redirectUri = encodeURIComponent(`${window.location.origin}/callback`)
+    const redirectUri = `${window.location.origin}/callback`
+    const encodedRedirectUri = encodeURIComponent(redirectUri)
     console.log('Redirect URI:', redirectUri)
-    const authUrl = `${KEYCLOAK_URL}/protocol/openid-connect/auth?client_id=${CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=openid email profile`
+    const authUrl = `${KEYCLOAK_URL}/protocol/openid-connect/auth?client_id=${CLIENT_ID}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=openid email profile`
     console.log('Auth URL:', authUrl)
     window.location.href = authUrl
   }
@@ -111,8 +112,9 @@ export function AuthProvider({ children }) {
       setUser(null)
       
       // Redirect to Keycloak logout
-      const redirectUri = encodeURIComponent(window.location.origin)
-      window.location.href = `${KEYCLOAK_URL}/protocol/openid-connect/logout?redirect_uri=${redirectUri}`
+      const redirectUri = window.location.origin
+      const encodedRedirectUri = encodeURIComponent(redirectUri)
+      window.location.href = `${KEYCLOAK_URL}/protocol/openid-connect/logout?redirect_uri=${encodedRedirectUri}`
     } catch (error) {
       console.error('Logout failed:', error.message)
     }
