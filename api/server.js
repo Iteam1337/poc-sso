@@ -11,6 +11,14 @@ const extractToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.log('No Authorization header or not Bearer token');
+    // Check for X-Auth-Request-Email header which OAuth2 Proxy might set
+    const email = req.headers['x-auth-request-email'];
+    if (email) {
+      req.user = { email };
+      req.token = 'dummy-token';
+      return next();
+    }
     return res.status(401).json({ error: 'No token provided' });
   }
   
@@ -21,19 +29,34 @@ const extractToken = (req, res, next) => {
     // In a real app, you would verify the token
     // Here we just decode it to extract user info
     const decoded = jwt.decode(token);
-    req.user = decoded;
+    req.user = decoded || { email: req.headers['x-auth-request-email'] || 'unknown@example.com' };
+    console.log('Decoded token:', decoded);
     next();
   } catch (error) {
-    return res.status(401).json({ error: 'Invalid token' });
+    console.error('Error decoding token:', error);
+    // Fallback to headers if token decoding fails
+    req.user = { 
+      email: req.headers['x-auth-request-email'] || 'unknown@example.com',
+      error: error.message
+    };
+    next();
   }
 };
 
 // Protected endpoint that requires authentication
 app.get('/user', extractToken, (req, res) => {
+  // Log all headers for debugging
+  console.log('Request headers:', req.headers);
+  
   res.json({
     message: 'Authenticated successfully',
     user: req.user,
-    token: req.token
+    token: req.token,
+    headers: {
+      'x-auth-request-email': req.headers['x-auth-request-email'],
+      'x-auth-request-user': req.headers['x-auth-request-user'],
+      'x-auth-request-access-token': req.headers['x-auth-request-access-token']
+    }
   });
 });
 

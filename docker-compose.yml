@@ -23,6 +23,8 @@ services:
       - OAUTH2_PROXY_SET_AUTHORIZATION_HEADER=true
       - OAUTH2_PROXY_REDIRECT_URL=http://localhost:4180/oauth2/callback
       - OAUTH2_PROXY_SCOPE=openid email profile
+      - OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true
+      - OAUTH2_PROXY_SKIP_EMAIL_VERIFICATION=true
     networks:
       - app-network
 
