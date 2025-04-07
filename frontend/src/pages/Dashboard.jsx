@@ -3,16 +3,20 @@ import { useAuth } from '../hooks/useAuth'
 import axios from 'axios'
 
 function Dashboard() {
-  const { user, logout } = useAuth()
+  const { user, logout, token } = useAuth()
   const [apiData, setApiData] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchApiData = async () => {
+      if (!token) return
+      
       try {
-        // Call our API with cookies (automatically sent)
+        // Call our API with the token
         const response = await axios.get('/api/user', {
-          withCredentials: true
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         })
         setApiData(response.data)
       } catch (error) {
@@ -23,7 +27,7 @@ function Dashboard() {
     }
 
     fetchApiData()
-  }, [])
+  }, [token])
 
   if (loading) {
     return <div>Loading...</div>
@@ -33,12 +37,12 @@ function Dashboard() {
     <div className="container">
       <h1>Dashboard</h1>
       <div className="user-info">
-        <h2>Welcome, {user.email || user.name || user.user || 'User'}</h2>
-        <p>You are authenticated!</p>
+        <h2>Welcome, {user?.name || user?.preferred_username || user?.email || 'User'}</h2>
+        <p>You are authenticated directly with Keycloak!</p>
 
         <div className="token-info">
           <h3>User Information</h3>
-          <h4>OAuth2 Proxy User Info:</h4>
+          <h4>Keycloak User Info:</h4>
           <pre>{JSON.stringify(user, null, 2)}</pre>
 
           {apiData && (

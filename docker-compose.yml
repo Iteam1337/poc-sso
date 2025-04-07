@@ -1,29 +1,6 @@
 version: '3.8'
 
 services:
-  oauth2-proxy:
-    image: bitnami/oauth2-proxy:latest
-    ports:
-      - '4180:4180'
-    environment:
-      - OAUTH2_PROXY_HTTP_ADDRESS=0.0.0.0:4180
-      - OAUTH2_PROXY_PROVIDER=oidc
-      - OAUTH2_PROXY_PROVIDER_DISPLAY_NAME=Keycloak
-      - OAUTH2_PROXY_OIDC_ISSUER_URL=https://keycloak.berget.ai/realms/iteam
-      - OAUTH2_PROXY_CLIENT_ID=demo
-      - OAUTH2_PROXY_CLIENT_SECRET=Yh8GYal2qaPE7tFe4Ka0mt6XgpqmLPTS
-      - OAUTH2_PROXY_COOKIE_SECRET=a4375069cebd0cd33b7fea46f1fc7c78
-      - OAUTH2_PROXY_EMAIL_DOMAINS=*
-      - OAUTH2_PROXY_UPSTREAMS=http://frontend:5173
-      - OAUTH2_PROXY_COOKIE_SECURE=false
-      - OAUTH2_PROXY_REVERSE_PROXY=true
-      - OAUTH2_PROXY_PASS_ACCESS_TOKEN=true
-      - OAUTH2_PROXY_SET_AUTHORIZATION_HEADER=true
-      - OAUTH2_PROXY_REDIRECT_URL=http://localhost:4180/oauth2/callback
-      - OAUTH2_PROXY_SCOPE=openid email profile
-    networks:
-      - app-network
-
   frontend:
     build:
       context: ./frontend
@@ -32,8 +9,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    depends_on:
-      - oauth2-proxy
     networks:
       - app-network
 
