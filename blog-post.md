@@ -38,6 +38,8 @@ Many teams fall into these common traps:
 - **Implementing custom auth in each microservice**: Leads to inconsistency and security gaps
 - **Duplicating auth logic**: Creates maintenance nightmares
 - **Passing tokens through multiple services**: Increases attack surface
+- **Duplicating security measures**: Different implementations for local/staging/production environments often lead to mistakes
+- **Environment-specific solutions**: Can lead to catastrophic security failures when code moves between environments
 
 ## The Solution: Centralized Identity with Keycloak
 
