@@ -31,6 +31,18 @@ The application consists of three main components:
 ## Project Structure
 
 ```
+├── api/                  # Backend Node.js API
+│   ├── middleware/       # Express middleware
+│   │   ├── auth.js       # JWT verification middleware
+│   │   └── cors.js       # CORS configuration
+│   ├── services/         # Business logic
+│   │   ├── jwksService.js # JWKS token verification
+│   │   └── tokenService.js # Token handling and exchange
+│   ├── .env              # Environment variables (not in repo)
+│   ├── Dockerfile        # Docker configuration
+│   ├── package.json      # Dependencies
+│   └── server.js         # Express server
+│
 ├── frontend/             # React frontend
 │   ├── src/
 │   │   ├── components/   # React components
@@ -47,18 +59,6 @@ The application consists of three main components:
 │   ├── Dockerfile        # Docker configuration
 │   ├── package.json      # Dependencies
 │   └── vite.config.js    # Vite configuration
-│
-├── api/                  # Backend Node.js API
-│   ├── middleware/       # Express middleware
-│   │   ├── auth.js       # JWT verification middleware
-│   │   └── cors.js       # CORS configuration
-│   ├── services/         # Business logic
-│   │   ├── jwksService.js # JWKS token verification
-│   │   └── tokenService.js # Token handling and exchange
-│   ├── .env              # Environment variables (not in repo)
-│   ├── Dockerfile        # Docker configuration
-│   ├── package.json      # Dependencies
-│   └── server.js         # Express server
 │
 └── docker-compose.yml    # Docker Compose configuration
 ```
@@ -110,22 +110,6 @@ This application implements several security best practices:
 3. **JWKS verification**: Tokens are cryptographically verified using Keycloak's public keys
 4. **CORS configuration**: Properly configured to prevent cross-origin attacks
 5. **Refresh token rotation**: Implemented for long-lived sessions
-
-## Key Components
-
-### Frontend
-
-- **AuthProvider**: React context that manages authentication state
-- **useAuth**: Custom hook for accessing authentication context
-- **authService**: Service for handling authentication operations
-- **ProtectedRoute**: Component that restricts access to authenticated users
-
-### Backend
-
-- **TokenService**: Handles token exchange, validation, and cookie management
-- **JwksService**: Verifies token signatures using Keycloak's public keys
-- **Auth Middleware**: Extracts and validates tokens from requests
-- **CORS Middleware**: Configures Cross-Origin Resource Sharing
 
 ## License
 
