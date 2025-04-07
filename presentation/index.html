@@ -73,13 +73,28 @@
     .mermaid {
       font-size: 0.8em;
     }
+    /* Brand style filter for background images */
+    .reveal .slides section[data-background-image] {
+      position: relative;
+    }
+    .reveal .slides section[data-background-image]::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(120deg, rgba(66, 175, 250, 0.1), rgba(25, 118, 210, 0.2));
+      pointer-events: none;
+      z-index: -1;
+    }
   </style>
 </head>
 <body>
   <div class="reveal">
     <div class="slides">
       <!-- TITLE SLIDE -->
-      <section data-background-gradient="linear-gradient(to bottom, #1a237e, #283593)">
+      <section data-background-image="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" data-background-opacity="0.3" data-background-color="#1a237e">
         <h1>Simplifying Authentication in Microservice Architectures</h1>
         <h3>Using Keycloak for Centralized Identity Management</h3>
         <p>Weekly Code Lunch - <span id="current-date"></span></p>
@@ -90,7 +105,7 @@
 
       <!-- WHY SECTION -->
       <section>
-        <section data-background-color="#2a2a2a">
+        <section data-background-image="https://images.unsplash.com/photo-1510511459019-5dda7724fd87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" data-background-opacity="0.2" data-background-color="#2a2a2a">
           <h2>Why This Matters</h2>
           <p>Authentication is a <span class="highlight">critical component</span> of any application</p>
           <ul>
@@ -119,7 +134,7 @@
 
       <!-- PROBLEM SECTION -->
       <section>
-        <section data-background-color="#2a2a2a">
+        <section data-background-image="https://images.unsplash.com/photo-1488229297570-58520851e868?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" data-background-opacity="0.2" data-background-color="#2a2a2a">
           <h2>The Problem</h2>
           <p>Microservice architectures introduce <span class="highlight">complex authentication challenges</span></p>
           <div class="mermaid">
@@ -166,7 +181,7 @@
 
       <!-- VISION SECTION -->
       <section>
-        <section data-background-color="#2a2a2a">
+        <section data-background-image="https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" data-background-opacity="0.2" data-background-color="#2a2a2a">
           <h2>The Vision</h2>
           <p>A <span class="highlight">centralized, secure, and standardized</span> authentication system</p>
           <ul>
@@ -195,7 +210,7 @@
 
       <!-- SOLUTION SECTION -->
       <section>
-        <section data-background-color="#2a2a2a">
+        <section data-background-image="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" data-background-opacity="0.2" data-background-color="#2a2a2a">
           <h2>The Solution</h2>
           <p>Centralized Identity with <span class="highlight">Keycloak</span></p>
           <div class="mermaid">
@@ -257,7 +272,7 @@
 
       <!-- IMPLEMENTATION DETAILS -->
       <section>
-        <section data-background-color="#2a2a2a">
+        <section data-background-image="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" data-background-opacity="0.2" data-background-color="#2a2a2a">
           <h2>Implementation Details</h2>
           <p>How we built it with <span class="highlight">React</span> and <span class="highlight">Node.js</span></p>
           <ul>
@@ -438,7 +453,7 @@ const extractJwtToken = (jwksService) => async (req, res, next) => {
 
       <!-- SCALING SECTION -->
       <section>
-        <section data-background-color="#2a2a2a">
+        <section data-background-image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" data-background-opacity="0.2" data-background-color="#2a2a2a">
           <h2>Scaling to Multiple Microservices</h2>
           <div class="mermaid">
             graph TD
@@ -467,7 +482,7 @@ const extractJwtToken = (jwksService) => async (req, res, next) => {
 
       <!-- PERFORMANCE SECTION -->
       <section>
-        <section data-background-color="#2a2a2a">
+        <section data-background-image="https://images.unsplash.com/photo-1504639725590-34d0984388bd?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" data-background-opacity="0.2" data-background-color="#2a2a2a">
           <h2>Performance Considerations</h2>
           <p>Optimizing token verification for high-performance systems</p>
           <ul>
@@ -541,7 +556,7 @@ helm install keycloak keycloak/keycloak \
 
       <!-- NEXT STEPS -->
       <section>
-        <section data-background-color="#2a2a2a">
+        <section data-background-image="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" data-background-opacity="0.2" data-background-color="#2a2a2a">
           <h2>Next Steps</h2>
           <ul>
             <li>Implement refresh token rotation</li>
@@ -557,7 +572,7 @@ helm install keycloak keycloak/keycloak \
       </section>
 
       <!-- CONCLUSION -->
-      <section data-background-gradient="linear-gradient(to bottom, #283593, #1a237e)">
+      <section data-background-image="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" data-background-opacity="0.3" data-background-color="#1a237e">
         <h2>Conclusion</h2>
         <p>By centralizing authentication with Keycloak, we've:</p>
         <ul>
