@@ -70,6 +70,7 @@ export function AuthProvider({ children }) {
   const login = () => {
     // Redirect to Keycloak login
     const redirectUri = encodeURIComponent(`${window.location.origin}/callback`)
+    console.log('Redirect URI:', redirectUri)
     const authUrl = `${KEYCLOAK_URL}/protocol/openid-connect/auth?client_id=${CLIENT_ID}&redirect_uri=${redirectUri}&response_type=token&scope=openid email profile`
     window.location.href = authUrl
   }
