@@ -10,16 +10,12 @@ Traditional monolithic applications had a straightforward authentication approac
 
 ```mermaid
 graph TD
-    A[Frontend App] --> B[BFF/API Gateway]
-    B --> C[Microservice 1]
-    B --> D[Microservice 2]
-    B --> E[Microservice 3]
+    A[Frontend App] --> B[API Gateway]
+    B --> C[Microservices]
 
     style A fill:#aabbcc,stroke:#000,stroke-width:2px
     style B fill:#a3a3a3,stroke:#000,stroke-width:2px
     style C fill:#737373,stroke:#000,stroke-width:2px
-    style D fill:#737373,stroke:#000,stroke-width:2px
-    style E fill:#737373,stroke:#000,stroke-width:2px
 ```
 
 ### Key Challenges:
@@ -47,19 +43,15 @@ Keycloak provides a comprehensive identity and access management solution that a
 
 ```mermaid
 graph TD
-    A[Frontend App] -->|1. Auth Request| K[Keycloak]
-    K -->|2. Auth Code| A
+    A[Frontend App] -->|1. Auth| K[Keycloak]
+    K -->|2. Code| A
     A -->|3. Code| B[Backend API]
-    B -->|4. Token Exchange| K
-    K -->|5. Tokens + JWT| B
-    B -->|6. Set HTTP-only Cookie| A
-    A -->|7. Cookie-based Requests| B
-    B -->|8. Verify Token| C[Microservices]
+    B <-->|4. Token Exchange| K
+    B -->|5. Set Cookie| A
 
     style A fill:#aabbcc,stroke:#ffffff,stroke-width:2px
     style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
     style K fill:#525252,stroke:#ffffff,stroke-width:4px
-    style C fill:#737373,stroke:#ffffff,stroke-width:2px
 ```
 
 ### Key Benefits:
@@ -283,21 +275,15 @@ This pattern scales well to multiple microservices:
 
 ```mermaid
 graph TD
-    A[Frontend] -->|Auth Code| B[API Gateway]
-    B -->|Token Exchange| K[Keycloak]
-    B -->|Verified Requests| C[Service 1]
-    B -->|Verified Requests| D[Service 2]
-    B -->|Verified Requests| E[Service 3]
-    C -->|JWKS Verification| K
-    D -->|JWKS Verification| K
-    E -->|JWKS Verification| K
+    A[Frontend] -->|Auth| B[API Gateway]
+    B <-->|Token| K[Keycloak]
+    B --> C[Services]
+    C -->|Verify| K
 
     style A fill:#aabbcc,stroke:#ffffff,stroke-width:2px
     style B fill:#a3a3a3,stroke:#ffffff,stroke-width:2px
     style K fill:#525252,stroke:#ffffff,stroke-width:4px
     style C fill:#737373,stroke:#ffffff,stroke-width:2px
-    style D fill:#737373,stroke:#ffffff,stroke-width:2px
-    style E fill:#737373,stroke:#ffffff,stroke-width:2px
 ```
 
 Each microservice can independently verify tokens using Keycloak's JWKS endpoint, without needing to share secrets.
