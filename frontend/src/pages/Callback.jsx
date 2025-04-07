@@ -44,7 +44,11 @@ function Callback() {
         navigate('/dashboard')
       } catch (tokenError) {
         console.error('Token exchange error:', tokenError)
-        setError(`Authentication failed: ${tokenError.message || 'Unknown error'}`)
+        const errorMessage = tokenError.response?.data?.details || 
+                            tokenError.response?.data?.error || 
+                            tokenError.message || 
+                            'Unknown error';
+        setError(`Authentication failed: ${errorMessage}`)
       } finally {
         setIsProcessing(false)
       }

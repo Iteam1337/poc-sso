@@ -22,6 +22,7 @@ class AuthService {
     console.log('Using redirect URI for token exchange:', redirectUri)
 
     try {
+      console.log('Sending code to backend for token exchange')
       const response = await axios.post(
         '/api/token',
         {
@@ -33,12 +34,18 @@ class AuthService {
         },
       )
 
+      console.log('Token exchange successful')
       return response.data
     } catch (error) {
       console.error(
         'Token exchange error:',
         error.response?.data || error.message,
       )
+      // Log more details about the error
+      if (error.response) {
+        console.error('Error response data:', error.response.data)
+        console.error('Error response status:', error.response.status)
+      }
       throw error
     }
   }

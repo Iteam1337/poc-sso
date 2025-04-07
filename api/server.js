@@ -18,6 +18,16 @@ const KEYCLOAK_URL =
 const CLIENT_ID = process.env.CLIENT_ID || 'demo'
 const CLIENT_SECRET = process.env.CLIENT_SECRET
 
+// Check for required environment variables
+if (!CLIENT_SECRET) {
+  console.warn('WARNING: CLIENT_SECRET environment variable is not set. Token exchange will fail.')
+  console.warn('Please set CLIENT_SECRET in your .env file or environment variables.')
+}
+
+console.log('Keycloak URL:', KEYCLOAK_URL)
+console.log('Client ID:', CLIENT_ID)
+console.log('Client Secret configured:', CLIENT_SECRET ? 'Yes' : 'No')
+
 // Initialize services
 const tokenService = new TokenService(KEYCLOAK_URL, CLIENT_ID, CLIENT_SECRET)
 const jwksService = new JwksService(KEYCLOAK_URL)
