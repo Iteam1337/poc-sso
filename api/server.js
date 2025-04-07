@@ -10,14 +10,16 @@ require('dotenv').config();
 const setupCors = require('./middleware/cors');
 const { extractJwtToken } = require('./middleware/auth');
 const TokenService = require('./services/tokenService');
+const JwksService = require('./services/jwksService');
 
 // Configuration
 const KEYCLOAK_URL = process.env.KEYCLOAK_URL || 'https://keycloak.berget.ai/realms/iteam';
 const CLIENT_ID = process.env.CLIENT_ID || 'demo';
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
-// Initialize token service
+// Initialize services
 const tokenService = new TokenService(KEYCLOAK_URL, CLIENT_ID, CLIENT_SECRET);
+const jwksService = new JwksService(KEYCLOAK_URL);
 
 // Middleware
 app.use(express.json());
@@ -41,8 +43,8 @@ app.post('/api/token', async (req, res) => {
     // Set cookies with the tokens
     tokenService.setCookies(res, tokenData);
     
-    // Extract user info from token
-    const user = tokenService.extractUserFromToken(tokenData.access_token);
+    // Extract user info from token with verification
+    const user = await tokenService.extractUserFromToken(tokenData.access_token, jwksService);
     
     res.json({ 
       message: 'Authentication successful',
@@ -59,7 +61,7 @@ app.post('/api/token', async (req, res) => {
 });
 
 // API endpoint that requires authentication
-app.get('/api/user', extractJwtToken, (req, res) => {
+app.get('/api/user', extractJwtToken(jwksService), (req, res) => {
   res.json({
     message: 'Authentication successful via direct Keycloak integration',
     user: req.user,
@@ -68,7 +70,7 @@ app.get('/api/user', extractJwtToken, (req, res) => {
 });
 
 // Also support /user endpoint
-app.get('/user', extractJwtToken, (req, res) => {
+app.get('/user', extractJwtToken(jwksService), (req, res) => {
   res.json({
     message: 'Authentication successful via direct Keycloak integration',
     user: req.user,

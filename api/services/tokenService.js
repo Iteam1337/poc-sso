@@ -38,14 +38,31 @@ class TokenService {
     return jose.decodeJwt(token);
   }
 
-  extractUserFromToken(token) {
-    const decodedToken = this.decodeToken(token);
-    return {
-      id: decodedToken.sub,
-      email: decodedToken.email,
-      name: decodedToken.name,
-      preferred_username: decodedToken.preferred_username
-    };
+  async extractUserFromToken(token, jwksService) {
+    try {
+      // If jwksService is provided, use it to verify the token
+      if (jwksService) {
+        const verifiedToken = await jwksService.verifyToken(token);
+        return {
+          id: verifiedToken.sub,
+          email: verifiedToken.email,
+          name: verifiedToken.name,
+          preferred_username: verifiedToken.preferred_username
+        };
+      } else {
+        // Fall back to just decoding without verification
+        const decodedToken = this.decodeToken(token);
+        return {
+          id: decodedToken.sub,
+          email: decodedToken.email,
+          name: decodedToken.name,
+          preferred_username: decodedToken.preferred_username
+        };
+      }
+    } catch (error) {
+      console.error('Error extracting user from token:', error.message);
+      throw error;
+    }
   }
 
   setCookies(res, { access_token, refresh_token, expires_in }) {

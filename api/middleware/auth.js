@@ -1,7 +1,7 @@
 const jose = require('jose');
 
 // Middleware to extract and verify JWT from cookies
-const extractJwtToken = async (req, res, next) => {
+const extractJwtToken = (jwksService) => async (req, res, next) => {
   try {
     // First check for token in cookie
     const token = req.cookies.auth_token;
@@ -20,9 +20,8 @@ const extractJwtToken = async (req, res, next) => {
     }
     
     try {
-      // In a production app, you would verify the token signature
-      // For this demo, we'll just decode it
-      const decodedToken = jose.decodeJwt(accessToken);
+      // Verify the token using JWKS
+      const decodedToken = await jwksService.verifyToken(accessToken);
       
       req.user = {
         id: decodedToken.sub,
@@ -45,7 +44,7 @@ const extractJwtToken = async (req, res, next) => {
       
       next();
     } catch (tokenError) {
-      console.error('Token decode error:', tokenError);
+      console.error('Token verification error:', tokenError.message);
       return res.status(401).json({ error: 'Invalid token' });
     }
   } catch (error) {
