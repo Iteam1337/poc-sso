@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
           setUser(response.data)
         }
       } catch (error) {
-        console.log('User not authenticated')
+        console.log('User not authenticated:', error.message)
         setUser(null)
       } finally {
         setLoading(false)
@@ -32,9 +32,9 @@ export function AuthProvider({ children }) {
   }, [])
 
   const login = () => {
-    // Redirect to OAuth2 Proxy login
+    // Redirect to OAuth2 Proxy login with redirect back to our app
     const currentUrl = window.location.origin
-    window.location.href = `/oauth2/sign_in?rd=${encodeURIComponent(currentUrl + '/dashboard')}`
+    window.location.href = `/oauth2/sign_in?rd=${encodeURIComponent(currentUrl)}`
   }
 
   const logout = async () => {
@@ -45,8 +45,10 @@ export function AuthProvider({ children }) {
       // Redirect to Keycloak logout
       const redirectUri = encodeURIComponent(window.location.origin)
       window.location.href = `https://keycloak.berget.ai/realms/iteam/protocol/openid-connect/logout?redirect_uri=${redirectUri}`
+      
+      setUser(null)
     } catch (error) {
-      console.error('Logout failed')
+      console.error('Logout failed:', error.message)
     }
   }
 
