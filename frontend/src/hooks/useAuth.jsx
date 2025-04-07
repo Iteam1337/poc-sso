@@ -33,8 +33,9 @@ export function AuthProvider({ children }) {
   }, [])
 
   const login = () => {
-    // Redirect to OAuth2 Proxy login
-    window.location.href = '/oauth2/sign_in'
+    // Redirect to OAuth2 Proxy login with a redirect back to our app
+    const currentUrl = window.location.origin;
+    window.location.href = `/oauth2/sign_in?rd=${encodeURIComponent(currentUrl)}`;
   }
 
   const logout = async () => {
