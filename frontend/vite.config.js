@@ -15,25 +15,25 @@ export default defineConfig({
         configure: (proxy, _options) => {
           proxy.on('proxyReq', (proxyReq, req, _res) => {
             // Log the request being proxied
-            console.log('Proxying request:', req.method, req.url);
+            console.log('Proxying request:', req.method, req.url)
             // Preserve the original host header
-            proxyReq.setHeader('X-Forwarded-Host', req.headers.host);
-            proxyReq.setHeader('X-Forwarded-Proto', 'http');
-          });
+            proxyReq.setHeader('X-Forwarded-Host', req.headers.host)
+            proxyReq.setHeader('X-Forwarded-Proto', 'http')
+          })
           proxy.on('proxyRes', (proxyRes, req, _res) => {
             // Log the response from the proxy
-            console.log('Proxy response:', proxyRes.statusCode, req.url);
-          });
+            console.log('Proxy response:', proxyRes.statusCode, req.url)
+          })
           proxy.on('error', (err, _req, _res) => {
-            console.error('Proxy error:', err);
-          });
-        }
+            console.error('Proxy error:', err)
+          })
+        },
       },
       '/api': {
         target: 'http://api:3001',
         changeOrigin: true,
-        secure: false
-      }
-    }
-  }
+        secure: false,
+      },
+    },
+  },
 })
