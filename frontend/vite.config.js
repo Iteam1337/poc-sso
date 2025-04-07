@@ -16,6 +16,9 @@ export default defineConfig({
           proxy.on('proxyReq', (proxyReq, req, _res) => {
             // Log the request being proxied
             console.log('Proxying request:', req.method, req.url);
+            // Preserve the original host header
+            proxyReq.setHeader('X-Forwarded-Host', req.headers.host);
+            proxyReq.setHeader('X-Forwarded-Proto', 'http');
           });
           proxy.on('proxyRes', (proxyRes, req, _res) => {
             // Log the response from the proxy
