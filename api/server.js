@@ -1,5 +1,5 @@
 const express = require('express');
-const { jwtDecode } = require('jose');
+const jose = require('jose');
 const cookieParser = require('cookie-parser');
 const axios = require('axios');
 const app = express();
@@ -50,7 +50,7 @@ const extractJwtToken = async (req, res, next) => {
     try {
       // In a production app, you would verify the token signature
       // For this demo, we'll just decode it
-      const decodedToken = jwtDecode(accessToken);
+      const decodedToken = jose.decodeJwt(accessToken);
       
       req.user = {
         id: decodedToken.sub,
@@ -131,7 +131,7 @@ app.post('/api/token', async (req, res) => {
     }
     
     // Return user info from the token
-    const decodedToken = jwtDecode(access_token);
+    const decodedToken = jose.decodeJwt(access_token);
     const user = {
       id: decodedToken.sub,
       email: decodedToken.email,
