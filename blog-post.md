@@ -360,6 +360,153 @@ For teams that prefer not to manage Keycloak themselves:
 
 Each option has its own trade-offs in terms of cost, control, and integration complexity.
 
+## Advanced Keycloak Features
+
+### What is Keycloak?
+
+Keycloak is an open-source Identity and Access Management (IAM) solution that provides:
+
+- **Single Sign-On (SSO)**: Users authenticate once and gain access to multiple applications
+- **Identity Brokering**: Connect to external identity providers like Google, GitHub, Microsoft, etc.
+- **Social Login**: Allow users to log in with their social media accounts
+- **User Federation**: Connect to existing LDAP or Active Directory servers
+- **Two-Factor Authentication**: Add an extra layer of security with OTP, WebAuthn, etc.
+- **Self-Service**: Users can register, verify email, reset passwords, and manage their accounts
+- **Admin Console**: Comprehensive UI for managing users, roles, clients, and more
+- **REST API**: Programmatic access to all Keycloak functionality
+
+### Next Steps: Using Scopes and Roles for Fine-Grained Access Control
+
+Once you have the basic authentication flow working, you can implement more advanced access control using Keycloak's scopes and roles.
+
+#### Example: Protecting Sensitive API Endpoints
+
+Let's say you have different types of API endpoints with varying sensitivity levels:
+
+1. **Public Data**: Available to all authenticated users
+2. **User-Specific Data**: Available only to the specific user
+3. **Administrative Data**: Available only to administrators
+
+Here's how to implement this with Keycloak:
+
+```javascript
+// Define roles in Keycloak
+// 1. Create 'user' role (default for all users)
+// 2. Create 'admin' role (for administrators)
+
+// In your API middleware, check for specific roles:
+const requireRole = (role) => (req, res, next) => {
+  // The user object was added by the JWT verification middleware
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  
+  // Check if the user has the required role
+  const userRoles = req.user.realm_access?.roles || [];
+  if (!userRoles.includes(role)) {
+    return res.status(403).json({ error: 'Insufficient permissions' });
+  }
+  
+  next();
+};
+
+// Public endpoint - requires authentication but no specific role
+app.get('/api/public-data', extractJwtToken(jwksService), (req, res) => {
+  res.json({ data: 'This is public data for authenticated users' });
+});
+
+// User-specific endpoint - requires authentication and checks user ID
+app.get('/api/user/:userId/data', extractJwtToken(jwksService), (req, res) => {
+  // Check if the authenticated user is accessing their own data
+  if (req.user.sub !== req.params.userId) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+  
+  res.json({ data: 'This is user-specific data' });
+});
+
+// Admin endpoint - requires the 'admin' role
+app.get('/api/admin/data', 
+  extractJwtToken(jwksService), 
+  requireRole('admin'), 
+  (req, res) => {
+    res.json({ data: 'This is administrative data' });
+  }
+);
+```
+
+#### Using Scopes for Fine-Grained Permissions
+
+Scopes allow you to define specific permissions within your application:
+
+1. **Define scopes in Keycloak**: Create scopes like `read:profile`, `write:profile`, `read:admin`, etc.
+2. **Request specific scopes during authentication**: Add scopes to your authorization request
+3. **Verify scopes in your API**: Check if the token contains the required scopes
+
+```javascript
+// When initiating login, request specific scopes
+const authUrl = `${KEYCLOAK_URL}/protocol/openid-connect/auth?client_id=${CLIENT_ID}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=openid email profile read:admin write:profile&state=${Date.now()}`;
+
+// In your API, check for specific scopes
+const requireScope = (scope) => (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  
+  // Check if the token contains the required scope
+  const tokenScopes = req.user.scope?.split(' ') || [];
+  if (!tokenScopes.includes(scope)) {
+    return res.status(403).json({ error: 'Insufficient permissions' });
+  }
+  
+  next();
+};
+
+// Endpoint that requires the 'write:profile' scope
+app.post('/api/profile', 
+  extractJwtToken(jwksService), 
+  requireScope('write:profile'), 
+  (req, res) => {
+    // Update profile logic
+    res.json({ success: true });
+  }
+);
+```
+
+### Implementing Multi-Factor Authentication (MFA)
+
+Keycloak supports various MFA methods:
+
+1. **Time-based One-Time Password (TOTP)**: Compatible with apps like Google Authenticator
+2. **WebAuthn/FIDO2**: Support for security keys and biometric authentication
+3. **SMS/Email OTP**: One-time codes sent via SMS or email
+
+To enable MFA:
+
+1. In the Keycloak admin console, go to Authentication > Flows
+2. Edit the Browser flow
+3. Add the desired authentication method (e.g., OTP Form)
+4. Set the requirement to "Required" or "Alternative"
+
+Users will then be prompted for the additional factor during login.
+
+### Centralizing Identity Providers
+
+One of Keycloak's most powerful features is identity brokering, which allows you to:
+
+1. **Connect multiple identity providers**: Google, GitHub, Microsoft, Facebook, etc.
+2. **Map external identities to local users**: Link social accounts to existing users
+3. **Standardize token format**: Regardless of the original IdP, your application receives a consistent token format
+
+To set up identity brokering:
+
+1. In the Keycloak admin console, go to Identity Providers
+2. Add a new provider (e.g., Google)
+3. Configure the provider with client ID and secret
+4. Set up attribute mapping to map external user attributes to Keycloak attributes
+
+Users will then see options to log in with these external providers on the Keycloak login page.
+
 ## Conclusion
 
 By centralizing authentication with Keycloak and implementing secure token handling patterns, we've simplified authentication in our microservice architecture while maintaining high security standards.
@@ -371,6 +518,9 @@ Key takeaways:
 3. **Verify tokens using JWKS**
 4. **Centralize authentication with Keycloak**
 5. **Follow OWASP security guidelines**
+6. **Leverage roles and scopes for fine-grained access control**
+7. **Implement MFA for enhanced security**
+8. **Centralize identity providers for a unified login experience**
 
 This approach reduces complexity, improves security, and makes your authentication system more maintainable as your microservice architecture grows.
 

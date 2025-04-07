@@ -675,6 +675,125 @@ helm install keycloak keycloak/keycloak \
               monitoring and alerting.
             </aside>
           </section>
+          
+          <section>
+            <h3>What is Keycloak?</h3>
+            <div class="two-columns">
+              <div class="column">
+                <h4>Core Features</h4>
+                <ul>
+                  <li>Open-source Identity and Access Management</li>
+                  <li>Single Sign-On (SSO)</li>
+                  <li>User Federation (LDAP/AD)</li>
+                  <li>Identity Brokering</li>
+                  <li>Social Login</li>
+                </ul>
+              </div>
+              <div class="column">
+                <h4>Security Features</h4>
+                <ul>
+                  <li>Multi-Factor Authentication</li>
+                  <li>WebAuthn/FIDO2 Support</li>
+                  <li>Password Policies</li>
+                  <li>Brute Force Protection</li>
+                  <li>Email Verification</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+          
+          <section>
+            <h3>Advanced Access Control</h3>
+            <div class="small-code">
+              <pre><code class="javascript">// Define middleware to check for specific roles
+const requireRole = (role) => (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  
+  // Check if the user has the required role
+  const userRoles = req.user.realm_access?.roles || [];
+  if (!userRoles.includes(role)) {
+    return res.status(403).json({ error: 'Insufficient permissions' });
+  }
+  
+  next();
+};
+
+// Admin endpoint - requires the 'admin' role
+app.get('/api/admin/data', 
+  extractJwtToken(jwksService), 
+  requireRole('admin'), 
+  (req, res) => {
+    res.json({ data: 'Administrative data' });
+  }
+);</code></pre>
+            </div>
+          </section>
+          
+          <section>
+            <h3>Using Scopes for Fine-Grained Permissions</h3>
+            <div class="small-code">
+              <pre><code class="javascript">// When initiating login, request specific scopes
+const authUrl = `${KEYCLOAK_URL}/protocol/openid-connect/auth
+  ?client_id=${CLIENT_ID}
+  &redirect_uri=${encodedRedirectUri}
+  &response_type=code
+  &scope=openid email profile read:admin write:profile
+  &state=${Date.now()}`;
+
+// Check for specific scopes in your API
+const requireScope = (scope) => (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  
+  // Check if the token contains the required scope
+  const tokenScopes = req.user.scope?.split(' ') || [];
+  if (!tokenScopes.includes(scope)) {
+    return res.status(403).json({ error: 'Insufficient permissions' });
+  }
+  
+  next();
+};</code></pre>
+            </div>
+          </section>
+          
+          <section>
+            <h3>Centralizing Identity Providers</h3>
+            <ul>
+              <li>Connect multiple identity providers (Google, GitHub, Microsoft, etc.)</li>
+              <li>Map external identities to local users</li>
+              <li>Standardize token format across providers</li>
+              <li>Unified login experience for users</li>
+              <li>Simplified integration for developers</li>
+            </ul>
+            <p class="smaller">Users can choose their preferred login method while your application receives consistent tokens</p>
+          </section>
+          
+          <section>
+            <h3>Multi-Factor Authentication</h3>
+            <div class="two-columns">
+              <div class="column">
+                <h4>Supported Methods</h4>
+                <ul>
+                  <li>Time-based One-Time Password (TOTP)</li>
+                  <li>WebAuthn/FIDO2 (Security Keys)</li>
+                  <li>SMS/Email OTP</li>
+                  <li>Mobile Push Notifications</li>
+                </ul>
+              </div>
+              <div class="column">
+                <h4>Implementation</h4>
+                <ol>
+                  <li>Configure Authentication Flows in Keycloak</li>
+                  <li>Add desired authentication methods</li>
+                  <li>Set requirements (Required/Alternative)</li>
+                  <li>Users prompted for additional factors during login</li>
+                </ol>
+              </div>
+            </div>
+          </section>
         </section>
 
         <!-- CONCLUSION -->
