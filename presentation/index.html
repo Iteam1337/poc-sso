@@ -440,6 +440,80 @@ const extractJwtToken = (jwksService) => async (req, res, next) => {
         </section>
       </section>
 
+      <!-- PERFORMANCE SECTION -->
+      <section>
+        <section data-background-color="#2a2a2a">
+          <h2>Performance Considerations</h2>
+          <p>Optimizing token verification for high-performance systems</p>
+          <ul>
+            <li>External API calls for every request could become a bottleneck</li>
+            <li>JWKS caching eliminates repeated network calls</li>
+            <li>In-memory verification is extremely fast</li>
+            <li>Proper implementation has minimal performance impact</li>
+          </ul>
+          <aside class="notes">
+            A common concern with token verification is the potential performance impact. However, with proper implementation using JWKS caching, this overhead can be minimized significantly.
+          </aside>
+        </section>
+        <section>
+          <h3>JWKS Caching Strategy</h3>
+          <div class="small-code">
+            <pre><code class="javascript">// Caching JWKS for better performance
+async getJwks() {
+  // Check if we need to refresh the JWKS
+  const now = Date.now();
+  if (!this.keyStore || !this.lastFetched || 
+      (now - this.lastFetched > this.cacheExpiryMs)) {
+    try {
+      console.log('Fetching JWKS from', this.jwksUri);
+      
+      // Create a JWKS from the response
+      this.keyStore = await jose.createRemoteJWKSet(
+        new URL(this.jwksUri)
+      );
+      this.lastFetched = now;
+      
+    } catch (error) {
+      console.error('Error fetching JWKS:', error.message);
+      throw error;
+    }
+  }
+  
+  return this.keyStore;
+}</code></pre>
+          </div>
+          <p class="smaller">JWKS is fetched once and cached for hours, making verification extremely fast</p>
+        </section>
+        <section>
+          <h3>Keycloak Deployment Options</h3>
+          <div class="two-columns">
+            <div class="column">
+              <h4>Kubernetes with Helm</h4>
+              <div class="small-code">
+                <pre><code class="bash"># Add Keycloak Helm repo
+helm repo add keycloak \
+  https://codecentric.github.io/helm-charts
+
+# Install Keycloak
+helm install keycloak keycloak/keycloak \
+  --namespace auth \
+  --create-namespace \
+  --set keycloak.persistence.deployPostgres=true</code></pre>
+              </div>
+            </div>
+            <div class="column">
+              <h4>Managed Options</h4>
+              <ul>
+                <li>Red Hat SSO (Commercial Keycloak)</li>
+                <li>AWS Cognito</li>
+                <li>Auth0</li>
+                <li>Okta</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </section>
+
       <!-- NEXT STEPS -->
       <section>
         <section data-background-color="#2a2a2a">

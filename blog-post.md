@@ -296,6 +296,91 @@ graph TD
 
 Each microservice can independently verify tokens using Keycloak's JWKS endpoint, without needing to share secrets.
 
+## Performance Considerations
+
+A common concern with token verification is the potential performance impact of making external API calls for every request. However, with proper implementation, this overhead can be minimized:
+
+### JWKS Caching
+
+The JWKS (JSON Web Key Set) contains the public keys used to verify token signatures. Instead of fetching these keys for every request, we can cache them:
+
+```javascript
+// Caching JWKS for better performance
+async getJwks() {
+  // Check if we need to refresh the JWKS
+  const now = Date.now();
+  if (!this.keyStore || !this.lastFetched || (now - this.lastFetched > this.cacheExpiryMs)) {
+    try {
+      console.log('Fetching JWKS from', this.jwksUri);
+      const response = await axios.get(this.jwksUri);
+      
+      // Create a JWKS from the response
+      this.keyStore = await jose.createRemoteJWKSet(new URL(this.jwksUri));
+      this.lastFetched = now;
+      
+      console.log('JWKS fetched successfully');
+    } catch (error) {
+      console.error('Error fetching JWKS:', error.message);
+      throw error;
+    }
+  }
+  
+  return this.keyStore;
+}
+```
+
+With this approach, the JWKS is only fetched once and then cached for a configurable period (typically hours). All token verifications during this period use the cached keys, making the verification process extremely fast and eliminating network calls.
+
+### In-Memory Verification
+
+Once the public keys are cached, token verification happens entirely in memory:
+
+1. The JWT signature is verified using the cached public key
+2. Claims like expiration time, issuer, and audience are validated
+3. No external API calls are needed for routine token verification
+
+This makes token verification nearly as fast as simple token decoding, with the added security of cryptographic validation.
+
+### Keycloak Deployment Options
+
+For production environments, you'll need to deploy Keycloak. Here are some options:
+
+#### Kubernetes Deployment with Helm
+
+Keycloak can be easily deployed to Kubernetes using the official Helm chart:
+
+```bash
+# Add the Keycloak Helm repository
+helm repo add keycloak https://codecentric.github.io/helm-charts
+helm repo update
+
+# Install Keycloak
+helm install keycloak keycloak/keycloak \
+  --namespace auth \
+  --create-namespace \
+  --set keycloak.persistence.deployPostgres=true \
+  --set keycloak.persistence.dbVendor=postgres
+```
+
+This deploys Keycloak with a PostgreSQL database for persistence. For production, you'll want to configure:
+
+- High availability with multiple replicas
+- Proper resource limits and requests
+- TLS certificates for secure communication
+- Integration with your existing database
+- Backup and disaster recovery procedures
+
+#### Managed Options
+
+For teams that prefer not to manage Keycloak themselves:
+
+- **Red Hat SSO**: Commercial support for Keycloak
+- **AWS Cognito**: AWS's managed identity service (different API but similar concepts)
+- **Auth0**: Commercial identity platform with similar capabilities
+- **Okta**: Enterprise identity management solution
+
+Each option has its own trade-offs in terms of cost, control, and integration complexity.
+
 ## Conclusion
 
 By centralizing authentication with Keycloak and implementing secure token handling patterns, we've simplified authentication in our microservice architecture while maintaining high security standards.
