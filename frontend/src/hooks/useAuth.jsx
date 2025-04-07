@@ -8,20 +8,20 @@ const CLIENT_ID = 'demo'
 
 const AuthContext = createContext(null)
 
+// Parse hash parameters from URL
+const getHashParams = () => {
+  const hash = window.location.hash.substr(1)
+  return hash.split('&').reduce((result, item) => {
+    const parts = item.split('=')
+    result[parts[0]] = decodeURIComponent(parts[1])
+    return result
+  }, {})
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [token, setToken] = useState(null)
-
-  // Parse hash parameters from URL
-  const getHashParams = () => {
-    const hash = window.location.hash.substr(1)
-    return hash.split('&').reduce((result, item) => {
-      const parts = item.split('=')
-      result[parts[0]] = decodeURIComponent(parts[1])
-      return result
-    }, {})
-  }
 
   // Check for token in URL hash (for implicit flow) or localStorage
   useEffect(() => {
@@ -93,6 +93,4 @@ export function AuthProvider({ children }) {
   )
 }
 
-export function useAuth() {
-  return useContext(AuthContext)
-}
+export const useAuth = () => useContext(AuthContext)
