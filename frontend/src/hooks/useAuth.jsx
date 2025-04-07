@@ -4,7 +4,7 @@ import axios from 'axios'
 // Keycloak configuration
 const KEYCLOAK_URL = 'https://keycloak.berget.ai/realms/iteam'
 const CLIENT_ID = 'demo'
-const REDIRECT_URI = window.location.origin + '/callback'
+// We'll set the redirect URI dynamically in the login function
 
 const AuthContext = createContext(null)
 
@@ -69,7 +69,8 @@ export function AuthProvider({ children }) {
 
   const login = () => {
     // Redirect to Keycloak login
-    const authUrl = `${KEYCLOAK_URL}/protocol/openid-connect/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=openid email profile`
+    const redirectUri = encodeURIComponent(`${window.location.origin}/callback`)
+    const authUrl = `${KEYCLOAK_URL}/protocol/openid-connect/auth?client_id=${CLIENT_ID}&redirect_uri=${redirectUri}&response_type=token&scope=openid email profile`
     window.location.href = authUrl
   }
 
