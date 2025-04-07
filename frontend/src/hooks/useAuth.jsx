@@ -12,25 +12,14 @@ export function AuthProvider({ children }) {
     // Check if user is authenticated
     const checkAuth = async () => {
       try {
-        // Try to access a protected endpoint
-        const response = await axios.get('/api/user')
-        if (response.data && response.data.token) {
-          try {
-            const decodedToken = jwtDecode(response.data.token)
-            setUser({
-              ...decodedToken,
-              token: response.data.token
-            })
-            console.log('User authenticated:', decodedToken)
-          } catch (decodeError) {
-            console.error('Error decoding token:', decodeError)
-            console.log('Raw token:', response.data.token)
-            setUser({
-              email: 'unknown@example.com',
-              name: 'Unknown User',
-              token: response.data.token
-            })
-          }
+        // Try to access the userinfo endpoint from OAuth2 Proxy
+        const response = await axios.get('/oauth2/userinfo', { 
+          withCredentials: true 
+        })
+        
+        if (response.data) {
+          console.log('User info from OAuth2 proxy:', response.data)
+          setUser(response.data)
         }
       } catch (error) {
         console.log('User not authenticated:', error.message)

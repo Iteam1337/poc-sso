@@ -5,57 +5,39 @@ const port = 3001;
 
 app.use(express.json());
 
-// Middleware to extract and validate token
-const extractToken = (req, res, next) => {
-  // OAuth2 Proxy passes the token in the Authorization header
-  const authHeader = req.headers.authorization;
+// Middleware to extract user info from headers
+const extractUserInfo = (req, res, next) => {
+  console.log('Headers received by API:', req.headers);
   
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.log('No Authorization header or not Bearer token');
-    // Check for X-Auth-Request-Email header which OAuth2 Proxy might set
-    const email = req.headers['x-auth-request-email'];
-    if (email) {
-      req.user = { email };
-      req.token = 'dummy-token';
-      return next();
-    }
-    return res.status(401).json({ error: 'No token provided' });
+  // Get user info from headers that might be set by the frontend
+  const email = req.headers['x-auth-email'];
+  const user = req.headers['x-auth-user'];
+  
+  if (!email && !user) {
+    console.log('No user info in headers');
+    return res.status(401).json({ error: 'No user information provided' });
   }
   
-  const token = authHeader.split(' ')[1];
-  req.token = token;
+  req.user = { 
+    email: email || 'unknown@example.com',
+    id: user || 'unknown-user'
+  };
   
-  try {
-    // In a real app, you would verify the token
-    // Here we just decode it to extract user info
-    const decoded = jwt.decode(token);
-    req.user = decoded || { email: req.headers['x-auth-request-email'] || 'unknown@example.com' };
-    console.log('Decoded token:', decoded);
-    next();
-  } catch (error) {
-    console.error('Error decoding token:', error);
-    // Fallback to headers if token decoding fails
-    req.user = { 
-      email: req.headers['x-auth-request-email'] || 'unknown@example.com',
-      error: error.message
-    };
-    next();
-  }
+  next();
 };
 
 // Protected endpoint that requires authentication
-app.get('/user', extractToken, (req, res) => {
+app.get('/user', extractUserInfo, (req, res) => {
   // Log all headers for debugging
   console.log('Request headers:', req.headers);
   
   res.json({
-    message: 'Authenticated successfully',
+    message: 'API received user information',
     user: req.user,
-    token: req.token,
-    headers: {
-      'x-auth-request-email': req.headers['x-auth-request-email'],
-      'x-auth-request-user': req.headers['x-auth-request-user'],
-      'x-auth-request-access-token': req.headers['x-auth-request-access-token']
+    timestamp: new Date().toISOString(),
+    receivedHeaders: {
+      'x-auth-email': req.headers['x-auth-email'],
+      'x-auth-user': req.headers['x-auth-user']
     }
   });
 });
