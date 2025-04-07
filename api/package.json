@@ -7,8 +7,8 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "cookie-parser": "^1.4.6",
+    "cookie-parser": "^1.4.7",
     "express": "^4.18.2",
-    "jose": "^5.2.0"
+    "jose": "^5.10.0"
   }
 }
