@@ -1,8 +1,16 @@
 const express = require('express');
 const { jwtDecode } = require('jose');
 const cookieParser = require('cookie-parser');
+const axios = require('axios');
 const app = express();
 const port = 3001;
+
+// Load environment variables
+require('dotenv').config();
+
+const KEYCLOAK_URL = process.env.KEYCLOAK_URL || 'https://keycloak.berget.ai/realms/iteam';
+const CLIENT_ID = process.env.CLIENT_ID || 'demo';
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
 app.use(express.json());
 app.use(cookieParser());
@@ -61,6 +69,75 @@ const extractJwtToken = async (req, res, next) => {
   }
 };
 
+// Token exchange endpoint
+app.post('/api/token', async (req, res) => {
+  try {
+    const { code, redirect_uri } = req.body;
+    
+    if (!code) {
+      return res.status(400).json({ error: 'Authorization code is required' });
+    }
+    
+    // Exchange the authorization code for tokens using client credentials
+    const tokenResponse = await axios.post(
+      `${KEYCLOAK_URL}/protocol/openid-connect/token`,
+      new URLSearchParams({
+        grant_type: 'authorization_code',
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        code: code,
+        redirect_uri: redirect_uri
+      }).toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    );
+    
+    const { access_token, refresh_token, expires_in } = tokenResponse.data;
+    
+    // Set the access token as an HTTP-only cookie
+    res.cookie('auth_token', access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: expires_in * 1000
+    });
+    
+    // Store refresh token in a separate cookie
+    if (refresh_token) {
+      res.cookie('refresh_token', refresh_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+      });
+    }
+    
+    // Return user info from the token
+    const decodedToken = jwtDecode(access_token);
+    const user = {
+      id: decodedToken.sub,
+      email: decodedToken.email,
+      name: decodedToken.name,
+      preferred_username: decodedToken.preferred_username
+    };
+    
+    res.json({ 
+      message: 'Authentication successful',
+      user,
+      expiresIn: expires_in
+    });
+  } catch (error) {
+    console.error('Token exchange error:', error.response?.data || error.message);
+    res.status(401).json({ 
+      error: 'Token exchange failed', 
+      details: error.response?.data || error.message 
+    });
+  }
+});
+
 // API endpoint that requires authentication
 app.get('/api/user', extractJwtToken, (req, res) => {
   res.json({
@@ -82,6 +159,7 @@ app.get('/user', extractJwtToken, (req, res) => {
 // Endpoint to clear auth cookie on logout
 app.get('/api/logout', (req, res) => {
   res.clearCookie('auth_token');
+  res.clearCookie('refresh_token');
   res.json({ message: 'Logged out successfully' });
 });
 

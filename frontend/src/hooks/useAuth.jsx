@@ -31,40 +31,21 @@ export function AuthProvider({ children }) {
         if (params.code) {
           console.log('Authorization code received:', params.code)
           
-          // Exchange code for token
+          // Exchange code for token through our secure API
           const tokenResponse = await axios.post(
-            `${KEYCLOAK_URL}/protocol/openid-connect/token`,
-            new URLSearchParams({
-              grant_type: 'authorization_code',
-              client_id: CLIENT_ID,
+            '/api/token',
+            {
               code: params.code,
               redirect_uri: `${window.location.origin}/callback`
-            }).toString(),
+            },
             {
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-              }
+              withCredentials: true // Important for cookies to be sent/received
             }
           )
           
-          const accessToken = tokenResponse.data.access_token
-          
-          // Make a request to our API with the token to set the HTTP-only cookie
-          await axios.get('/api/user', {
-            headers: {
-              Authorization: `Bearer ${accessToken}`
-            },
-            withCredentials: true // Important for cookies to be sent/received
-          })
-          
-          // Get user info using the token
-          const userInfo = await axios.get(`${KEYCLOAK_URL}/protocol/openid-connect/userinfo`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`
-            }
-          })
-          
-          setUser(userInfo.data)
+          // The API has already set the HTTP-only cookie with the token
+          // and returned the user info
+          setUser(tokenResponse.data.user)
           
           // Clean up the URL
           window.history.replaceState({}, document.title, window.location.pathname)
