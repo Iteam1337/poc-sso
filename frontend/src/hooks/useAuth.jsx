@@ -7,40 +7,13 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Check for code in URL query params (for authorization code flow)
+  // Check for existing session on initial load
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Check if we have a code in the URL (after redirect)
-        const params = authService.getQueryParams()
-
-        if (params.code) {
-          console.log('Authorization code received:', params.code)
-
-          try {
-            // Exchange code for token through our secure API
-            const tokenResponse = await authService.exchangeCodeForToken(
-              params.code,
-            )
-
-            // Set user from the response
-            setUser(tokenResponse.user)
-
-            // Clean up the URL
-            window.history.replaceState(
-              {},
-              document.title,
-              window.location.pathname,
-            )
-          } catch (tokenError) {
-            console.error('Token exchange error:', tokenError)
-            setUser(null)
-          }
-        } else {
-          // Try to get user info from API using the cookie
-          const userInfo = await authService.getUserInfo()
-          setUser(userInfo)
-        }
+        // Try to get user info from API using the cookie
+        const userInfo = await authService.getUserInfo()
+        setUser(userInfo)
       } catch (error) {
         console.error('Authentication error:', error.message)
         setUser(null)
@@ -66,7 +39,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   )

@@ -1,38 +1,57 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import authService from '../services/authService'
 
 function Callback() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const [searchParams] = useSearchParams()
+  const { user, setUser } = useAuth()
   const [error, setError] = useState(null)
+  const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
-    // Check for error in URL
-    const urlParams = new URLSearchParams(window.location.search)
-    const errorParam = urlParams.get('error')
-    const errorDescription = urlParams.get('error_description')
+    const handleCallback = async () => {
+      // Check for error in URL
+      const errorParam = searchParams.get('error')
+      const errorDescription = searchParams.get('error_description')
 
-    if (errorParam) {
-      setError(`${errorParam}: ${errorDescription || 'Unknown error'}`)
-      return
-    }
+      if (errorParam) {
+        setError(`${errorParam}: ${errorDescription || 'Unknown error'}`)
+        return
+      }
 
-    // The AuthProvider will handle extracting the code from the URL
-    const checkAuthStatus = () => {
-      if (user) {
+      const code = searchParams.get('code')
+      if (!code) {
+        setError('No authorization code received from Keycloak. Please try again.')
+        return
+      }
+
+      if (isProcessing || user) return
+
+      setIsProcessing(true)
+      try {
+        // Exchange code for token through our secure API
+        const tokenResponse = await authService.exchangeCodeForToken(code)
+        
+        // Set user from the response
+        setUser(tokenResponse.user)
+        
+        // Clean up the URL
+        window.history.replaceState({}, document.title, window.location.pathname)
+        
+        // Navigate to dashboard
         navigate('/dashboard')
-      } else if (!urlParams.has('code')) {
-        // If no code and no user, something went wrong
-        setError(
-          'No authorization code received from Keycloak. Please refresh the page and try again.',
-        )
+      } catch (tokenError) {
+        console.error('Token exchange error:', tokenError)
+        setError(`Authentication failed: ${tokenError.message || 'Unknown error'}`)
+      } finally {
+        setIsProcessing(false)
       }
     }
 
-    const timer = setTimeout(checkAuthStatus, 1000)
-    return () => clearTimeout(timer)
-  }, [navigate, user])
+    handleCallback()
+  }, [searchParams, navigate, user, setUser, isProcessing])
 
   if (error) {
     return (
