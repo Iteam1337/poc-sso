@@ -42,11 +42,35 @@ app.get('/user', extractUserInfo, (req, res) => {
   });
 });
 
+// Also add the endpoint with /api prefix for direct access
+app.get('/api/user', extractUserInfo, (req, res) => {
+  // Log all headers for debugging
+  console.log('Request headers:', req.headers);
+  
+  res.json({
+    message: 'API received user information',
+    user: req.user,
+    timestamp: new Date().toISOString(),
+    receivedHeaders: {
+      'x-auth-email': req.headers['x-auth-email'],
+      'x-auth-user': req.headers['x-auth-user']
+    }
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Log all incoming requests for debugging
+app.use((req, res, next) => {
+  console.log(`API Request: ${req.method} ${req.url}`);
+  console.log('Headers:', req.headers);
+  next();
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`API server running on port ${port}`);
+  console.log(`Available endpoints: /health, /user, /api/user`);
 });
