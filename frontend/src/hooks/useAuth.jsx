@@ -31,24 +31,32 @@ export function AuthProvider({ children }) {
         if (params.code) {
           console.log('Authorization code received:', params.code)
           
+          const redirectUri = `${window.location.origin}/callback`
+          console.log('Using redirect URI for token exchange:', redirectUri)
+          
           // Exchange code for token through our secure API
-          const tokenResponse = await axios.post(
-            '/api/token',
-            {
-              code: params.code,
-              redirect_uri: `${window.location.origin}/callback`
-            },
-            {
-              withCredentials: true // Important for cookies to be sent/received
-            }
-          )
-          
-          // The API has already set the HTTP-only cookie with the token
-          // and returned the user info
-          setUser(tokenResponse.data.user)
-          
-          // Clean up the URL
-          window.history.replaceState({}, document.title, window.location.pathname)
+          try {
+            const tokenResponse = await axios.post(
+              '/api/token',
+              {
+                code: params.code,
+                redirect_uri: redirectUri
+              },
+              {
+                withCredentials: true // Important for cookies to be sent/received
+              }
+            )
+            
+            // The API has already set the HTTP-only cookie with the token
+            // and returned the user info
+            setUser(tokenResponse.data.user)
+            
+            // Clean up the URL
+            window.history.replaceState({}, document.title, window.location.pathname)
+          } catch (tokenError) {
+            console.error('Token exchange error:', tokenError.response?.data || tokenError.message)
+            setUser(null)
+          }
         } else {
           // Try to get user info from API using the cookie
           try {
@@ -65,7 +73,7 @@ export function AuthProvider({ children }) {
           }
         }
       } catch (error) {
-        console.log('Authentication error:', error.message)
+        console.error('Authentication error:', error.message)
         setUser(null)
       } finally {
         setLoading(false)
@@ -79,8 +87,8 @@ export function AuthProvider({ children }) {
     // Redirect to Keycloak login
     const redirectUri = `${window.location.origin}/callback`
     const encodedRedirectUri = encodeURIComponent(redirectUri)
-    console.log('Redirect URI:', redirectUri)
-    const authUrl = `${KEYCLOAK_URL}/protocol/openid-connect/auth?client_id=${CLIENT_ID}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=openid email profile`
+    console.log('Redirect URI for authorization:', redirectUri)
+    const authUrl = `${KEYCLOAK_URL}/protocol/openid-connect/auth?client_id=${CLIENT_ID}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=openid email profile&state=${Date.now()}`
     console.log('Auth URL:', authUrl)
     window.location.href = authUrl
   }

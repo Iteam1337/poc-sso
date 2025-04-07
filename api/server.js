@@ -15,6 +15,19 @@ const CLIENT_SECRET = process.env.CLIENT_SECRET;
 app.use(express.json());
 app.use(cookieParser());
 
+// Enable CORS for the frontend
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:5173');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // Middleware to extract and verify JWT from cookies
 const extractJwtToken = async (req, res, next) => {
   try {
@@ -77,6 +90,8 @@ app.post('/api/token', async (req, res) => {
     if (!code) {
       return res.status(400).json({ error: 'Authorization code is required' });
     }
+    
+    console.log(`Attempting to exchange code for token with redirect_uri: ${redirect_uri}`);
     
     // Exchange the authorization code for tokens using client credentials
     const tokenResponse = await axios.post(
