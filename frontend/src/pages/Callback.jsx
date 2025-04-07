@@ -1,18 +1,48 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 
 function Callback() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const [error, setError] = useState(null)
   
   useEffect(() => {
-    // The AuthProvider will handle extracting the token from the URL
-    // Just redirect to dashboard after a short delay
-    const timer = setTimeout(() => {
-      navigate('/dashboard')
-    }, 100)
+    // Check for error in URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const errorParam = urlParams.get('error')
+    const errorDescription = urlParams.get('error_description')
     
+    if (errorParam) {
+      setError(`${errorParam}: ${errorDescription || 'Unknown error'}`)
+      return
+    }
+    
+    // The AuthProvider will handle extracting the code from the URL
+    const checkAuthStatus = () => {
+      if (user) {
+        navigate('/dashboard')
+      } else if (!urlParams.has('code')) {
+        // If no code and no user, something went wrong
+        setError('No authorization code received from Keycloak')
+      }
+    }
+    
+    const timer = setTimeout(checkAuthStatus, 1000)
     return () => clearTimeout(timer)
-  }, [navigate])
+  }, [navigate, user])
+  
+  if (error) {
+    return (
+      <div className="container">
+        <h2>Authentication Error</h2>
+        <div className="error-message">
+          <p>{error}</p>
+          <button onClick={() => navigate('/')}>Return to Login</button>
+        </div>
+      </div>
+    )
+  }
   
   return (
     <div className="container">
