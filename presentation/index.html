@@ -105,6 +105,12 @@
                 B --> C[Microservice 1]
                 B --> D[Microservice 2]
                 B --> E[Microservice 3]
+                
+                style A fill:#f9f,stroke:#333,stroke-width:2px
+                style B fill:#bbf,stroke:#333,stroke-width:2px
+                style C fill:#dfd,stroke:#333,stroke-width:2px
+                style D fill:#dfd,stroke:#333,stroke-width:2px
+                style E fill:#dfd,stroke:#333,stroke-width:2px
           </div>
           <aside class="notes">
             In a microservice architecture, each service potentially needs to verify user identity.
@@ -177,6 +183,11 @@
                 B -->|6. Set HTTP-only Cookie| A
                 A -->|7. Cookie-based Requests| B
                 B -->|8. Verify Token| C[Microservices]
+                
+                style A fill:#f9f,stroke:#333,stroke-width:2px
+                style B fill:#bbf,stroke:#333,stroke-width:2px
+                style K fill:#ffd,stroke:#333,stroke-width:4px
+                style C fill:#dfd,stroke:#333,stroke-width:2px
           </div>
           <aside class="notes">
             Keycloak provides a comprehensive identity and access management solution.
@@ -414,6 +425,13 @@ const extractJwtToken = (jwksService) => async (req, res, next) => {
                 C -->|JWKS Verification| K
                 D -->|JWKS Verification| K
                 E -->|JWKS Verification| K
+                
+                style A fill:#f9f,stroke:#333,stroke-width:2px
+                style B fill:#bbf,stroke:#333,stroke-width:2px
+                style K fill:#ffd,stroke:#333,stroke-width:4px
+                style C fill:#dfd,stroke:#333,stroke-width:2px
+                style D fill:#dfd,stroke:#333,stroke-width:2px
+                style E fill:#dfd,stroke:#333,stroke-width:2px
           </div>
           <p class="smaller">Each microservice can independently verify tokens using Keycloak's JWKS endpoint</p>
           <aside class="notes">
@@ -475,7 +493,11 @@ const extractJwtToken = (jwksService) => async (req, res, next) => {
     mermaid.initialize({
       startOnLoad: false,
       theme: 'dark',
-      securityLevel: 'loose'
+      securityLevel: 'loose',
+      flowchart: {
+        htmlLabels: true,
+        curve: 'basis'
+      }
     });
 
     // Render Mermaid diagrams when the slide is shown
