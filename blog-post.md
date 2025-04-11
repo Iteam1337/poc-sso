@@ -39,11 +39,11 @@ Keycloak provides a comprehensive identity and access management solution that a
 
 ```mermaid
 graph TD
-    A[Frontend App] -->|1. Auth| K[Keycloak]
-    K -->|2. Code| A
-    A -->|3. Code| B[Backend API]
-    B <-->|4. Token Exchange| K
-    B -->|5. Set Cookie| A
+    A[Frontend App] -->|1 Auth| K[Keycloak]
+    K -->|2 Code| A
+    A -->|3 Code| B[Backend API]
+    B <-->|4 Token Exchange| K
+    B -->|5 Set Cookie| A
 ```
 
 ### Key Benefits:
