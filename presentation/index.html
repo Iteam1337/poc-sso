@@ -295,11 +295,11 @@
             </p>
             <pre class="mermaid">
               graph TD
-              A[Frontend] -->|1. Auth| K[Keycloak]
-              K -->|2. Code| A
-              A -->|3. Code| B[API]
-              B <-->|4. Token| K
-              B -->|5. Cookie| A
+              A[Frontend] --> |1. Auth| K[Keycloak]
+              K --> |2. Code| A
+              A --> |3. Code| B[API]
+              B <--> |4. Token| K
+              B --> |5. Cookie| A
             </pre>
             <aside class="notes">
               Keycloak provides a comprehensive identity and access management
@@ -545,7 +545,7 @@ const extractJwtToken = (jwksService) => async (req, res, next) => {
         <section>
           <section
             data-background-image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
-            data-background-opacity="0.2"
+            data-background-opacity="0.05"
             data-background-color="#2a2a2a"
           >
             <h2>Scaling to Multiple Microservices</h2>
@@ -675,7 +675,7 @@ helm install keycloak keycloak/keycloak \
               monitoring and alerting.
             </aside>
           </section>
-          
+
           <section>
             <h3>What is Keycloak?</h3>
             <div class="two-columns">
@@ -701,7 +701,7 @@ helm install keycloak keycloak/keycloak \
               </div>
             </div>
           </section>
-          
+
           <section>
             <h3>Advanced Access Control</h3>
             <div class="small-code">
@@ -730,7 +730,7 @@ app.get('/api/admin/data',
 );</code></pre>
             </div>
           </section>
-          
+
           <section>
             <h3>Using Scopes for Fine-Grained Permissions</h3>
             <div class="small-code">
@@ -758,19 +758,25 @@ const requireScope = (scope) => (req, res, next) => {
 };</code></pre>
             </div>
           </section>
-          
+
           <section>
             <h3>Centralizing Identity Providers</h3>
             <ul>
-              <li>Connect multiple identity providers (Google, GitHub, Microsoft, etc.)</li>
+              <li>
+                Connect multiple identity providers (Google, GitHub, Microsoft,
+                etc.)
+              </li>
               <li>Map external identities to local users</li>
               <li>Standardize token format across providers</li>
               <li>Unified login experience for users</li>
               <li>Simplified integration for developers</li>
             </ul>
-            <p class="smaller">Users can choose their preferred login method while your application receives consistent tokens</p>
+            <p class="smaller">
+              Users can choose their preferred login method while your
+              application receives consistent tokens
+            </p>
           </section>
-          
+
           <section>
             <h3>Multi-Factor Authentication</h3>
             <div class="two-columns">
@@ -810,7 +816,7 @@ const requireScope = (scope) => (req, res, next) => {
             <li>Reduced complexity for developers</li>
             <li>Created a scalable solution for future growth</li>
           </ul>
-          <p><strong>Questions?</strong></p>
+          <p><strong>DEMO!</strong></p>
         </section>
       </div>
     </div>
@@ -848,7 +854,7 @@ const requireScope = (scope) => (req, res, next) => {
         flowchart: {
           htmlLabels: true,
           curve: 'basis',
-        }
+        },
       })
 
       // Render Mermaid diagrams when the slide is shown
