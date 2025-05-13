@@ -6,11 +6,9 @@ const port = 3001
 // Load environment variables
 require('dotenv').config()
 
-// Import middleware and services
+// Import middleware
 const setupCors = require('./middleware/cors')
-const { extractJwtToken } = require('./middleware/auth')
-const TokenService = require('./services/tokenService')
-const JwksService = require('./services/jwksService')
+const initKeycloak = require('keycloak-koa')
 
 // Configuration
 const KEYCLOAK_URL =
@@ -32,9 +30,12 @@ console.log('Keycloak URL:', KEYCLOAK_URL)
 console.log('Client ID:', CLIENT_ID)
 console.log('Client Secret configured:', CLIENT_SECRET ? 'Yes' : 'No')
 
-// Initialize services
-const tokenService = new TokenService(KEYCLOAK_URL, CLIENT_ID, CLIENT_SECRET)
-const jwksService = new JwksService(KEYCLOAK_URL)
+// Initialize Keycloak
+const keycloak = initKeycloak({
+  keycloakUrl: KEYCLOAK_URL,
+  clientId: CLIENT_ID,
+  clientSecret: CLIENT_SECRET
+})
 
 // Middleware
 app.use(express.json())
@@ -54,19 +55,11 @@ app.post('/api/token', async (req, res) => {
       `Attempting to exchange code for token with redirect_uri: ${redirect_uri}`,
     )
 
-    // Exchange the authorization code for tokens
-    const tokenData = await tokenService.exchangeCodeForTokens(
+    // Exchange the authorization code for tokens using keycloak-koa
+    const { user, tokenData } = await keycloak.handleTokenExchange(
       code,
       redirect_uri,
-    )
-
-    // Set cookies with the tokens
-    tokenService.setCookies(res, tokenData)
-
-    // Extract user info from token with verification
-    const user = await tokenService.extractUserFromToken(
-      tokenData.access_token,
-      jwksService,
+      res
     )
 
     res.json({
@@ -87,9 +80,9 @@ app.post('/api/token', async (req, res) => {
 })
 
 // API endpoint that requires authentication
-app.get('/api/user', extractJwtToken(jwksService), (req, res) => {
+app.get('/api/user', keycloak.middleware.extractJwtToken, (req, res) => {
   res.json({
-    message: 'Authentication successful via direct Keycloak integration',
+    message: 'Authentication successful via Keycloak integration',
     user: req.user,
     timestamp: new Date().toISOString(),
   })
@@ -97,7 +90,7 @@ app.get('/api/user', extractJwtToken(jwksService), (req, res) => {
 
 // Endpoint to clear auth cookie on logout
 app.get('/api/logout', (req, res) => {
-  tokenService.clearAuthCookies(res)
+  keycloak.logout(res)
   res.json({ message: 'Logged out successfully' })
 })
 

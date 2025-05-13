@@ -11,6 +11,7 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
     "express": "^4.18.2",
-    "jose": "^5.10.0"
+    "jose": "^5.10.0",
+    "keycloak-koa": "file:../packages/keycloak-koa"
   }
 }
