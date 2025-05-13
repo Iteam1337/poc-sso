@@ -113,7 +113,7 @@ describe('Middleware', () => {
       
       // Verify
       expect(mockRes.status).toHaveBeenCalledWith(401);
-      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Invalid token' });
+      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Authentication failed' });
       expect(mockNext).not.toHaveBeenCalled();
     });
 

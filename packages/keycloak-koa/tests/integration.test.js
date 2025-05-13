@@ -135,7 +135,7 @@ describe('Integration Tests', () => {
         .set('Cookie', ['auth_token=invalid-token']);
       
       expect(response.status).toBe(401);
-      expect(response.body.error).toBe('Invalid token');
+      expect(response.body.error).toBe('Authentication failed');
     });
     
     it('should deny access with no token', async () => {
