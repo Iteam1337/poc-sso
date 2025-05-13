@@ -73,17 +73,11 @@ describe('TokenService', () => {
     });
 
     it('should handle token exchange errors', async () => {
-      axios.post.mockRejectedValue({
-        response: {
-          status: 400,
-          data: { error: 'invalid_grant', error_description: 'Invalid code' },
-          headers: {},
-        },
-      });
+      axios.post.mockRejectedValue(new Error('Invalid code'));
 
       await expect(tokenService.exchangeCodeForTokens('invalid-code', 'uri'))
         .rejects
-        .toThrow();
+        .toThrow('Invalid code');
     });
   });
 
