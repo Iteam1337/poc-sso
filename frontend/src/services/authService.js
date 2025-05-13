@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 // Keycloak configuration
-const KEYCLOAK_URL = 'https://keycloak.berget.ai/realms/iteam'
-const CLIENT_ID = 'demo'
+const KEYCLOAK_URL = 'https://auth-test.mimer.nu/realms/onecore-test'
+const CLIENT_ID = 'poc-sso'
 
 class AuthService {
   // Redirect to Keycloak login
@@ -79,7 +79,6 @@ class AuthService {
       throw error
     }
   }
-
 }
 
 export default new AuthService()
