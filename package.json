@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "cd packages/keycloak-koa && npm test",
-    "setup": "npm install && cd packages/keycloak-koa && npm install && cd ../../api && npm install"
+    "setup": "npm install && cd packages/keycloak-koa && npm install && cd ../../api && npm install",
+    "setup:keycloak-react": "mkdir -p packages/keycloak-react/lib packages/keycloak-react/tests && cd packages/keycloak-react && npm install",
+    "dev:frontend": "cd frontend && npm run dev"
   },
   "author": "",
   "license": "ISC",
