@@ -14,14 +14,18 @@ const JwksService = require('./services/jwksService')
 
 // Configuration
 const KEYCLOAK_URL =
-  process.env.KEYCLOAK_URL || 'https://keycloak.berget.ai/realms/iteam'
-const CLIENT_ID = process.env.CLIENT_ID || 'demo'
+  process.env.KEYCLOAK_URL || 'https://auth-test.mimer.nu/realms/onecore-test'
+const CLIENT_ID = process.env.CLIENT_ID || 'poc-sso'
 const CLIENT_SECRET = process.env.CLIENT_SECRET
 
 // Check for required environment variables
 if (!CLIENT_SECRET) {
-  console.warn('WARNING: CLIENT_SECRET environment variable is not set. Token exchange will fail.')
-  console.warn('Please set CLIENT_SECRET in your .env file or environment variables.')
+  console.warn(
+    'WARNING: CLIENT_SECRET environment variable is not set. Token exchange will fail.',
+  )
+  console.warn(
+    'Please set CLIENT_SECRET in your .env file or environment variables.',
+  )
 }
 
 console.log('Keycloak URL:', KEYCLOAK_URL)
