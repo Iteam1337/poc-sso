@@ -19,15 +19,12 @@ class JwksService {
       now - this.lastFetched > this.cacheExpiryMs
     ) {
       try {
-        console.log('Fetching JWKS from', this.jwksUri)
         const response = await axios.get(this.jwksUri)
         const jwks = response.data
 
         // Create a JWKS from the response
         this.keyStore = await jose.createRemoteJWKSet(new URL(this.jwksUri))
         this.lastFetched = now
-
-        console.log('JWKS fetched successfully')
       } catch (error) {
         console.error('Error fetching JWKS:', error.message)
         throw error

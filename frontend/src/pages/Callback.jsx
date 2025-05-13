@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
-import authService from '../services/authService'
+import { useAuth } from 'keycloak-react'
 
 function Callback() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { user, setUser } = useAuth()
+  const { handleCallback } = useAuth()
   const [error, setError] = useState(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
-    const handleCallback = async () => {
+    const processCallback = async () => {
       // Check for error in URL
       const errorParam = searchParams.get('error')
       const errorDescription = searchParams.get('error_description')
@@ -27,15 +26,12 @@ function Callback() {
         return
       }
 
-      if (isProcessing || user) return
+      if (isProcessing) return
 
       setIsProcessing(true)
       try {
         // Exchange code for token through our secure API
-        const tokenResponse = await authService.exchangeCodeForToken(code)
-        
-        // Set user from the response
-        setUser(tokenResponse.user)
+        await handleCallback(code)
         
         // Clean up the URL
         window.history.replaceState({}, document.title, window.location.pathname)
@@ -54,8 +50,8 @@ function Callback() {
       }
     }
 
-    handleCallback()
-  }, [searchParams, navigate, user, setUser, isProcessing])
+    processCallback()
+  }, [searchParams, navigate, handleCallback, isProcessing])
 
   if (error) {
     return (

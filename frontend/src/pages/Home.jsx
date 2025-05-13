@@ -1,4 +1,4 @@
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from 'keycloak-react'
 import { useNavigate } from 'react-router-dom'
 
 function Home() {

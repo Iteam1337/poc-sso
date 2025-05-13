@@ -45,7 +45,6 @@ const extractJwtToken = (jwksService) => async (req, res, next) => {
 
       next()
     } catch (tokenError) {
-      console.error('Token verification error:', tokenError.message)
       return res.status(401).json({ error: 'Authentication failed' })
     }
   } catch (error) {

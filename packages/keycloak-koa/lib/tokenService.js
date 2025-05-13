@@ -11,13 +11,8 @@ class TokenService {
 
   async exchangeCodeForTokens(code, redirectUri) {
     try {
-      console.log(`Exchanging code for token with Keycloak at ${this.tokenEndpoint}`)
-      console.log(`Using client ID: ${this.clientId}`)
-      console.log(`Using redirect URI: ${redirectUri}`)
-      
       // Check if client secret is available
       if (!this.clientSecret) {
-        console.error('CLIENT_SECRET is not configured')
         throw new Error('Missing client secret configuration')
       }
       
@@ -39,17 +34,8 @@ class TokenService {
         },
       )
 
-      console.log('Token exchange successful with Keycloak')
       return response.data
     } catch (error) {
-      console.error('Token exchange error with Keycloak:')
-      if (error.response) {
-        console.error('Status:', error.response.status)
-        console.error('Data:', JSON.stringify(error.response.data))
-        console.error('Headers:', JSON.stringify(error.response.headers))
-      } else {
-        console.error('Error message:', error.message)
-      }
       throw error
     }
   }
@@ -80,7 +66,6 @@ class TokenService {
         }
       }
     } catch (error) {
-      console.error('Error extracting user from token:', error.message)
       throw error
     }
   }
